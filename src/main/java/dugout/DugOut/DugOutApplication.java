@@ -10,4 +10,5 @@ public class DugOutApplication {
 		SpringApplication.run(DugOutApplication.class, args);
 	}
 
+
 }
