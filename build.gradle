@@ -36,3 +36,11 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+//tasks.jar {
+//	this.enabled = false
+//}
+
+jar {
+	enabled = false
+}
