@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 public class User {
     
     @Id
-    @Column(name = "user_idx")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_idx", columnDefinition = "INT AUTO_INCREMENT")
     private Integer userIdx;
     
     @Column(nullable = false, length = 20)
