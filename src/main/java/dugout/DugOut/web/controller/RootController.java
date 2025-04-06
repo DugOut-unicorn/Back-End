@@ -1,7 +1,7 @@
 package dugout.DugOut.web.controller;
 
 import dugout.DugOut.domain.User;
-import dugout.DugOut.domain.UserRepository;
+import dugout.DugOut.repository.UserRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
