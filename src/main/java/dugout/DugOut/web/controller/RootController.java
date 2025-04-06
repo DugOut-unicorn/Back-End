@@ -1,7 +1,7 @@
 package dugout.DugOut.web.controller;
 
 import dugout.DugOut.domain.User;
-import dugout.DugOut.domain.UserRepository;
+import dugout.DugOut.repository.UserRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,13 +31,13 @@ public class RootController {
     public String addTestData() {
         User user = new User();
         user.setName("테스트");
-        user.setNickname("테스트닉네임");
+        user.setNickname("테스트닉네임3");
         user.setCheeringTeamId(1);
-        user.setBio("테스트 바이오");
+        user.setBio("테스트3 바이오");
         user.setBirth(LocalDate.of(1990, 1, 1));
         user.setGender(User.Gender.M);
-        user.setEmail("test@test.com");
-        user.setPhoneNumber("010-1234-5678");
+        user.setEmail("test3@test.com");
+        user.setPhoneNumber("010-1234-4678");
         user.setStatus(0);
         
         userRepository.save(user);
