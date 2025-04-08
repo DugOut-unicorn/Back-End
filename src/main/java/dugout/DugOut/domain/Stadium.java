@@ -14,7 +14,7 @@ public class Stadium {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "stadium_idx", columnDefinition = "INT AUTO_INCREMENT")
+    @Column(name = "stadium_idx")
     private Integer stadiumIdx;
     
     @Column(name = "team_idx", nullable = false)

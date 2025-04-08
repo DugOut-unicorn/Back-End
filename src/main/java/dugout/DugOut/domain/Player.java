@@ -14,7 +14,7 @@ public class Player {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "player_idx", columnDefinition = "INT AUTO_INCREMENT")
+    @Column(name = "player_idx")
     private Integer playerIdx;
     
     @Column(name = "team_idx", nullable = false)

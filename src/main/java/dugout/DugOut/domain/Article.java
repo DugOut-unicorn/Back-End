@@ -17,7 +17,7 @@ public class Article {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "article_idx", columnDefinition = "INT AUTO_INCREMENT")
+    @Column(name = "article_idx")
     private Integer articleIdx;
     
     @Column(nullable = false, columnDefinition = "TEXT")
