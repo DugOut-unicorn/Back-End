@@ -16,19 +16,19 @@ public class Game {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "gameIdx")
+    @Column(name = "game_idx")
     private Integer gameIdx;
     
-    @Column(name = "homeTeamIdx", nullable = false)
+    @Column(name = "home_team_idx", nullable = false)
     private Integer homeTeamIdx;
     
-    @Column(name = "stadiumIdx", nullable = false)
+    @Column(name = "stadium_idx", nullable = false)
     private Integer stadiumIdx;
     
-    @Column(name = "awayTeamIdx", nullable = false)
+    @Column(name = "away_team_idx", nullable = false)
     private Integer awayTeamIdx;
     
-    @Column(name = "startTime", nullable = false)
+    @Column(name = "start_time", nullable = false)
     private Integer startTime;
     
     @Column(nullable = false)

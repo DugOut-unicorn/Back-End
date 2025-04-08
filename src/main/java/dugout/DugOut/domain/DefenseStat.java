@@ -14,13 +14,13 @@ public class DefenseStat {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "defStatIdx")
+    @Column(name = "def_stat_idx", columnDefinition = "INT AUTO_INCREMENT")
     private Integer defStatIdx;
     
-    @Column(name = "playerIdx", nullable = false)
+    @Column(name = "player_idx", nullable = false)
     private Integer playerIdx;
     
-    @Column(name = "teamIdx", nullable = false)
+    @Column(name = "team_idx", nullable = false)
     private Integer teamIdx;
     
     @Column(length = 20)
