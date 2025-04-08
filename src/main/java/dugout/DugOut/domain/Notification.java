@@ -17,7 +17,7 @@ public class Notification {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_idx", columnDefinition = "INT AUTO_INCREMENT")
+    @Column(name = "notification_idx")
     private Integer notificationIdx;
     
     @Column(name = "user_idx", nullable = false)

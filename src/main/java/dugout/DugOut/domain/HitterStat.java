@@ -16,13 +16,13 @@ public class HitterStat {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "hitStatIdx")
+    @Column(name = "hit_stat_idx", columnDefinition = "INT AUTO_INCREMENT")
     private Integer hitStatIdx;
     
-    @Column(name = "playerIdx", nullable = false)
+    @Column(name = "player_idx", nullable = false)
     private Integer playerIdx;
     
-    @Column(name = "teamIdx", nullable = false)
+    @Column(name = "team_idx", nullable = false)
     private Integer teamIdx;
     
     private Integer g;

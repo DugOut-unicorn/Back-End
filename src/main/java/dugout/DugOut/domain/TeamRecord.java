@@ -16,10 +16,10 @@ public class TeamRecord {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "teamRecordIdx")
+    @Column(name = "team_record_idx", columnDefinition = "INT AUTO_INCREMENT")
     private Integer teamRecordIdx;
     
-    @Column(name = "teamIdx", nullable = false)
+    @Column(name = "team_idx", nullable = false)
     private Integer teamIdx;
     
     @Column(nullable = false)

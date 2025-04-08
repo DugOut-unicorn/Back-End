@@ -17,7 +17,7 @@ public class Block {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "block_idx", columnDefinition = "INT AUTO_INCREMENT")
+    @Column(name = "block_idx")
     private Integer blockIdx;
     
     @Column(name = "user_idx", nullable = false)

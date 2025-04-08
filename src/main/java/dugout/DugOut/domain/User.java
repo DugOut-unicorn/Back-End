@@ -18,34 +18,35 @@ public class User {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_idx", columnDefinition = "INT AUTO_INCREMENT")
+    @Column(name = "user_idx")
     private Integer userIdx;
     
-    @Column(nullable = false, length = 20)
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
     
-    @Column(nullable = false, length = 50)
+    @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
     
-    @Column(name = "cheering_team_id", nullable = false)
+    @Column(name = "cheering_team_id")
     private Integer cheeringTeamId;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "bio", length = 500)
     private String bio;
     
+    @Column(name = "birth")
     private LocalDate birth;
     
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "enum('F','M')")
+    @Column(name = "gender", length = 10)
     private Gender gender;
     
-    @Column(length = 100, unique = true)
+    @Column(name = "email", length = 100)
     private String email;
     
-    @Column(name = "phone_number", length = 15, unique = true)
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
     
-    @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "status")
     private Integer status;
     
     @CreationTimestamp
