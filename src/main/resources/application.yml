@@ -23,6 +23,10 @@ spring:
 server:
   port: 8080
 
+kakao:
+  client_id: 43e854f2ea91afea0aeb2e7df943a60d
+  redirect_uri: http://localhost:8080/callback
+
 # Swagger 설정
 springdoc:
   swagger-ui:
