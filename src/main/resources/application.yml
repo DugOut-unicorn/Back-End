@@ -2,9 +2,9 @@ spring:
   application:
     name: DugOut
   datasource:
-    url: jdbc:mysql://dugout-dev.cn6mm486utfi.ap-northeast-2.rds.amazonaws.com:3306/dugoutDB
-    username: root
-    password: dugout2025!!
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     hikari:
       driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
@@ -24,8 +24,8 @@ server:
   port: 8080
 
 kakao:
-  client_id: 43e854f2ea91afea0aeb2e7df943a60d
-  redirect_uri: http://localhost:8080/callback
+  client_id: ${KAKAO_CLIENT_ID}
+  redirect_uri: ${KAKAO_REDIRECT_URL}
 
 # Swagger 설정
 springdoc:
