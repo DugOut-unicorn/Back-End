@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface MatchingPostRepository extends JpaRepository<MatchingPost, Integer> {
     List<MatchingPost> findTop5ByOrderByCreatedAtDesc();
+    List<MatchingPost> findByUserIdx(Integer userIdx);
 } 
