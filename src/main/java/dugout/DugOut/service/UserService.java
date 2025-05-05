@@ -23,4 +23,8 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
     }
+
+    public Integer getCheeringTeamId(Integer userIdx) {
+        return userRepository.findCheeringTeamIdByUserIdx(userIdx);
+    }
 } 

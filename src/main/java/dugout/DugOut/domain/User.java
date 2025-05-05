@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -56,4 +58,12 @@ public class User {
     public enum Gender {
         M, F
     }
+
+    /** 한 유저가 여러 매칭글을 작성할 수 있으므로 1:N 매핑 */
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<MatchingPost> matchingPosts = new ArrayList<>();
 } 
