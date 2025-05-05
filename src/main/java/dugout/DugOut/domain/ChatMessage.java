@@ -39,3 +39,4 @@ public class ChatMessage {
     @Column(name = "sentAt", nullable = false, updatable = false)
     private LocalDateTime sentAt;
 } 
+ 

@@ -11,3 +11,4 @@ public interface MatchingPostRepository extends JpaRepository<MatchingPost, Inte
     List<MatchingPost> findTop5ByOrderByCreatedAtDesc();
     List<MatchingPost> findByUserIdx(Integer userIdx);
 } 
+ 

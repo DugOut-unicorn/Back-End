@@ -48,3 +48,4 @@ public class DefenseStat {
     
     private Integer cs;
 } 
+ 

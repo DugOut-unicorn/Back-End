@@ -58,3 +58,5 @@ public class TeamRecord {
     @Column(name = "away_record")
     private String awayRecord;
 }
+
+ 

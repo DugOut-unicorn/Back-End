@@ -23,3 +23,4 @@ public class Stadium {
     @Column(name = "stadium_name", length = 20)
     private String stadiumName;
 } 
+ 

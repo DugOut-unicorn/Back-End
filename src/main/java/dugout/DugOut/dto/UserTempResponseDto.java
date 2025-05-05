@@ -15,3 +15,4 @@ public class UserTempResponseDto {
         this.cheeringTeamId = user.getCheeringTeamId();
     }
 } 
+ 

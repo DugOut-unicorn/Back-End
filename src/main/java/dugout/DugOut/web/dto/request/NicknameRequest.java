@@ -17,4 +17,3 @@ public class NicknameRequest {
     
     @Schema(description = "응원팀 ID", example = "1")
     private Integer cheeringTeamId;
-} 

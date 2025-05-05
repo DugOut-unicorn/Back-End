@@ -33,3 +33,4 @@ public class MatchingPostResponseDto {
         this.isMatched = matchingPost.getIsMatched();
     }
 } 
+ 

@@ -7,3 +7,4 @@ public class UserInfoUpdateRequestDto {
     private String email;
     private String phoneNumber;
 } 
+ 

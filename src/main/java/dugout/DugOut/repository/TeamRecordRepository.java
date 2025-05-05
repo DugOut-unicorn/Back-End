@@ -16,3 +16,5 @@ public interface TeamRecordRepository extends JpaRepository<TeamRecord, Integer>
      */
     List<TeamRecord> findAllByDateOrderByWinRateDesc(LocalDate date);
 }
+
+ 

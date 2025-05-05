@@ -80,3 +80,4 @@ public class HitterStat {
     @Column(columnDefinition = "DECIMAL(5,3)")
     private BigDecimal xr;
 } 
+ 

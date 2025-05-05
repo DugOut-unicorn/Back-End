@@ -8,3 +8,4 @@ public class ErrorResponse {
     public static final String USER_NOT_FOUND = "존재하지 않는 사용자입니다.";
 
 } 
+ 

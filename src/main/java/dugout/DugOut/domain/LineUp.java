@@ -35,3 +35,4 @@ public class LineUp {
     @Column(nullable = false, length = 10)
     private String position;
 } 
+ 

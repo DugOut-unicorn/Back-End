@@ -37,3 +37,4 @@ public class Game {
     @Column(nullable = false)
     private GameStatus status;
 } 
+ 

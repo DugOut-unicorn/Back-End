@@ -21,29 +21,3 @@ spring:
           auto: none
         default_batch_fetch_size: 1000
 server:
-  port: 8080
-  error:
-    include-message: always
-    include-stacktrace: always
-
-kakao:
-  client_id: ${KAKAO_CLIENT_ID}
-  redirect_uri: ${KAKAO_REDIRECT_URL}
-
-# Swagger 설정
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-  api-docs:
-    path: /api-docs
-  default-consumes-media-type: application/json
-  default-produces-media-type: application/json
-  show-actuator: false
-
-# 날씨 데이터 설정
-kma:
-  base-url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
-  service:
-    key: Nt3BF2GSZAFpHDA88bTZjwRo48oIV94CqEFptjRbEcdj9HIMU3gXfrIwCq6epzdPrO4hzbewvD8jTzTc95IM9g==

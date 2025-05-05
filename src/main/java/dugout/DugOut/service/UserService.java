@@ -28,3 +28,4 @@ public class UserService {
         return userRepository.findCheeringTeamIdByUserIdx(userIdx);
     }
 } 
+ 

@@ -56,3 +56,5 @@ public class MatchingPost {
     @Column(name = "is_matched", nullable = false)
     private Integer isMatched = 0;
 }
+
+ 

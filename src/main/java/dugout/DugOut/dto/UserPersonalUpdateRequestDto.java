@@ -8,3 +8,4 @@ public class UserPersonalUpdateRequestDto {
     private String bio;
     private Integer cheeringTeamId;
 } 
+ 

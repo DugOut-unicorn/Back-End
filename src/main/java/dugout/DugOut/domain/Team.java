@@ -20,3 +20,4 @@ public class Team {
     @Column(name = "team_name", length = 20)
     private String teamName;
 } 
+ 
