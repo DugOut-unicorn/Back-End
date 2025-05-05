@@ -11,12 +11,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Team {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "team_idx")
     private Integer teamIdx;
-    
+
     @Column(name = "team_name", length = 20)
     private String teamName;
 } 
