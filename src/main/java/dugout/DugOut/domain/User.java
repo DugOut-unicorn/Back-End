@@ -47,9 +47,14 @@ public class User {
     
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
-    
+
+    @Builder.Default
     @Column(name = "status")
-    private Integer status;
+    private Integer status=1;
+
+    @Builder.Default
+    @Column(name = "user_temp")
+    private Float userTemp = 36.5f;
     
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

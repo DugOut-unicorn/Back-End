@@ -31,5 +31,14 @@ public interface MatchingPostRepository extends JpaRepository<MatchingPost, Inte
       order by p.createdAt desc
     """)
     List<MatchingPostResponse> findTop5WithValidUser(Pageable pageable);
-}
 
+    /**
+     * 순수 엔티티로 상위 5개만 조회할 때 사용합니다.
+     */
+    List<MatchingPost> findTop5ByOrderByCreatedAtDesc();
+
+    /**
+     * 특정 유저가 작성한 모든 매칭글 조회
+     */
+    List<MatchingPost> findByUserIdx(Integer userIdx);
+}
