@@ -9,21 +9,48 @@ import java.time.LocalDateTime;
 public class MatchingPostResponse {
     private final Integer postIdx;
     private final String title;
-    private final String context;
-    private final LocalDateTime createdAt;
     private final Integer stadiumIdx;
     private final Integer gameIdx;
-    private final Integer status;
+    private final String context;
     private final String userNickname;
+    private final Integer status;
+    private final LocalDateTime createdAt;
 
+    /**
+     * JPQL projection 전용 생성자
+     *  순서: postIdx, title, stadiumIdx, gameIdx, context, userNickname, status, createdAt
+     */
+    public MatchingPostResponse(
+            Integer postIdx,
+            String title,
+            Integer stadiumIdx,
+            Integer gameIdx,
+            String context,
+            String userNickname,
+            Integer status,
+            LocalDateTime createdAt
+    ) {
+        this.postIdx      = postIdx;
+        this.title        = title;
+        this.stadiumIdx   = stadiumIdx;
+        this.gameIdx      = gameIdx;
+        this.context      = context;
+        this.userNickname = userNickname;
+        this.status       = status;
+        this.createdAt    = createdAt;
+    }
+
+    /** Entity → DTO 변환용 생성자 (기존) */
     public MatchingPostResponse(MatchingPost e) {
-        this.postIdx     = e.getMatchingPostIdx();
-        this.title       = e.getTitle();
-        this.context     = e.getContext();
-        this.createdAt   = e.getCreatedAt();
-        this.stadiumIdx  = e.getStadiumIdx();
-        this.gameIdx     = e.getGameIdx();
-        this.status      = e.getStatus();
-        this.userNickname  = e.getUser().getNickname();
+        this(
+                e.getMatchingPostIdx(),
+                e.getTitle(),
+                e.getStadiumIdx(),
+                e.getGameIdx(),
+                e.getContext(),
+                e.getUser() != null ? e.getUser().getNickname() : null,
+                e.getStatus(),
+                e.getCreatedAt()
+        );
     }
 }
