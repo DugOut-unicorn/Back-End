@@ -18,6 +18,6 @@ public class MatchingPostService {
 
     public List<MatchingPostResponse> getRecentPosts() {
         // PageRequest.of(0, 5) 로 상위 5개만 가져옵니다.
-        return repo.findTop5WithValidUser(PageRequest.of(0, 5));
+        return repo.findTop5WithValidUser(PageRequest.of(0, 10));
     }
 }
