@@ -90,14 +90,11 @@ public class HomeController {
 
     // 팀 랭킹 반환
     @GetMapping("/ranking")
-    public ResponseEntity<List<TeamRankingResponse>> getRanking(
-            @RequestParam("date")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate date
-    ) {
-        List<TeamRankingResponse> ranking = teamRankingService.getRankingByDate(date);
+    public ResponseEntity<List<TeamRankingResponse>> getRanking() {
+        List<TeamRankingResponse> ranking = teamRankingService.getLatestRanking();
         return ResponseEntity.ok(ranking);
     }
+
 
     //사용자가 응원하는 팀의 경기일 반환
     @GetMapping("/users/{userId}/calendar/days")
