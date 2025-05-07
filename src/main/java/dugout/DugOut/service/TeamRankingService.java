@@ -19,11 +19,14 @@ public class TeamRankingService {
     }
 
     /**
-     * 요청 날짜(targetDate)에 대한 팀 랭킹 요약 (팀명, 경기, 승, 무, 패) 반환
+     * 가장 최근 날짜의 팀 랭킹 요약 (팀명, 경기, 승, 무, 패) 반환
      */
-    public List<TeamRankingResponse> getRankingByDate(LocalDate targetDate) {
-        List<TeamRecord> records = teamRecordRepo.findAllByDateOrderByWinRateDesc(targetDate);
-
+    public List<TeamRankingResponse> getLatestRanking() {
+        LocalDate latestDate = teamRecordRepo.findLatestDate();
+        if (latestDate == null) {
+            return List.of();  // 데이터가 하나도 없으면 빈 리스트
+        }
+        List<TeamRecord> records = teamRecordRepo.findAllByDateOrderByWinRateDesc(latestDate);
         return records.stream()
                 .map(tr -> new TeamRankingResponse(
                         tr.getTeam().getTeamName(),
@@ -35,3 +38,4 @@ public class TeamRankingService {
                 .collect(Collectors.toList());
     }
 }
+
