@@ -32,3 +32,4 @@ public interface MatchingPostRepository extends JpaRepository<MatchingPost, Inte
     """)
     List<MatchingPostResponse> findTop5WithValidUser(Pageable pageable);
 }
+
