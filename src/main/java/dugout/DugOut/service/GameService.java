@@ -25,10 +25,15 @@ public class GameService {
      * @param now 현재 시각 (HH:mm)
      */
     public List<Game> getOngoingGames(LocalDate day, LocalTime now) {
-        LocalDateTime startOfDay  = day.atStartOfDay();
-        LocalDateTime nowDateTime = LocalDateTime.of(day, now);
-        return gameRepository.findOngoingByPeriod(startOfDay, nowDateTime);
+        LocalDateTime startOfDay = day.atStartOfDay();
+        // 과거 날짜면 endOfDay, 오늘이면 now
+        LocalDate today = LocalDate.now();
+        LocalDateTime endOfDayOrNow = day.isEqual(today)
+                ? LocalDateTime.of(day, now)
+                : day.atTime(LocalTime.MAX);
+        return gameRepository.findOngoingByPeriod(startOfDay, endOfDayOrNow);
     }
+
 
     /**
      * 임의의 기간(start~end)에 포함된 모든 Game 엔티티를 조회

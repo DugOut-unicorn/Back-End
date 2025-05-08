@@ -44,23 +44,38 @@ public class HomeController {
         return ResponseEntity.ok(new CheeringTeamResponse(cheeringTeamId));
     }
 
-    //최신 뉴스 크롤링 후 반환
+//    //최신 뉴스 크롤링 후 반환
+//    @GetMapping("/news-fetch")
+//    public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn() throws IOException {
+//        // 오늘 날짜 ISO 포맷 (yyyy-MM-dd)
+//        String todayIso = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+//        // Selenium 으로 바로 스크래핑한 결과
+//        List<NewsResponse> latest = newsFetchService.scrapeWithSelenium(todayIso);
+//        return ResponseEntity.ok(latest);
+//    }
+
     @GetMapping("/news-fetch")
-    public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn() throws IOException {
-        // 오늘 날짜 ISO 포맷 (yyyy-MM-dd)
-        String todayIso = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        // Selenium 으로 바로 스크래핑한 결과
-        List<NewsResponse> latest = newsFetchService.scrapeWithSelenium(todayIso);
+    public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn(
+            @RequestParam(value = "date", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date
+    ) throws IOException {
+        // 파라미터 없으면 오늘, 있으면 해당 날짜 사용
+        LocalDate target = (date != null ? date : LocalDate.now());
+        String isoDate = target.format(DateTimeFormatter.ISO_DATE);
+
+        List<NewsResponse> latest = newsFetchService.scrapeLatest(isoDate);
         return ResponseEntity.ok(latest);
     }
 
     //진행 중인 경기 조회
     @GetMapping("/ongoing-games")
     public ResponseEntity<List<Game>> getOngoing(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(value="time", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time
     ) {
-        // 서버 시간대 기준 현재 시각
-        LocalTime now = LocalTime.now();
+        LocalTime now = (time != null ? time : LocalTime.now());
         List<Game> ongoing = gameService.getOngoingGames(date, now);
         return ResponseEntity.ok(ongoing);
     }
@@ -68,23 +83,18 @@ public class HomeController {
     // 최신 5개 매칭글 반환
     @GetMapping("/recent-matching-posts")
     public ResponseEntity<List<MatchingPostResponse>> getRecent() {
-        List<MatchingPostResponse> dtoList = matchingPostService.getRecentPosts()
-                .stream()
-                .map(MatchingPostResponse::new)
-                .toList();
+        List<MatchingPostResponse> dtoList = matchingPostService.getRecentPosts();
         return ResponseEntity.ok(dtoList);
     }
 
+
     // 팀 랭킹 반환
     @GetMapping("/ranking")
-    public ResponseEntity<List<TeamRankingResponse>> getRanking(
-            @RequestParam("date")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate date
-    ) {
-        List<TeamRankingResponse> ranking = teamRankingService.getRankingByDate(date);
+    public ResponseEntity<List<TeamRankingResponse>> getRanking() {
+        List<TeamRankingResponse> ranking = teamRankingService.getLatestRanking();
         return ResponseEntity.ok(ranking);
     }
+
 
     //사용자가 응원하는 팀의 경기일 반환
     @GetMapping("/users/{userId}/calendar/days")
