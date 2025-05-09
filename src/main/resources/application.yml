@@ -48,6 +48,7 @@ kma:
   service:
     key: ${KMA_KEY}
 
+# JWT 인증
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000 # 24시간
