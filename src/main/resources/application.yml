@@ -44,10 +44,10 @@ springdoc:
 
 # 날씨 데이터 설정
 kma:
-  base-url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
+  base-url: ${KMA_URL}
   service:
-    key: Nt3BF2GSZAFpHDA88bTZjwRo48oIV94CqEFptjRbEcdj9HIMU3gXfrIwCq6epzdPrO4hzbewvD8jTzTc95IM9g==
+    key: ${KMA_KEY}
 
 jwt:
-  secret: ${JWT_SECRET:BIscoTNRwNyJ3Ana3CH99jzF/ezm0mUJRFP381IePw+ZG03FWT87mngDDAIXvsuhZvavj2OhVDsb7qYCGYJQnQ==}
+  secret: ${JWT_SECRET}
   expiration: 86400000 # 24시간
