@@ -8,7 +8,10 @@ import dugout.DugOut.dto.UserPersonalUpdateRequestDto;
 import dugout.DugOut.dto.UserTempResponseDto;
 import dugout.DugOut.repository.MatchingPostRepository;
 import dugout.DugOut.repository.UserRepository;
+import dugout.DugOut.service.JwtService;
 import dugout.DugOut.web.dto.response.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,35 +19,38 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/mypage")
+@RequiredArgsConstructor
 public class MypageController {
 
     private final MatchingPostRepository matchingPostRepository;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    public MypageController(MatchingPostRepository matchingPostRepository, UserRepository userRepository) {
-        this.matchingPostRepository = matchingPostRepository;
-        this.userRepository = userRepository;
+    private User getCurrentUser(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        String email = jwtService.getEmailFromToken(token);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @GetMapping("/myChat")
-    public List<MatchingPostResponseDto> getMyChats(@RequestParam Integer userIdx) {
-        List<MatchingPost> matchingPosts = matchingPostRepository.findByUserIdx(userIdx);
+    public List<MatchingPostResponseDto> getMyChats(HttpServletRequest request) {
+        User user = getCurrentUser(request);
+        List<MatchingPost> matchingPosts = matchingPostRepository.findByUserIdx(user.getUserIdx());
         return matchingPosts.stream()
                 .map(MatchingPostResponseDto::new)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/myTemp")
-    public UserTempResponseDto getMyTemp(@RequestParam Integer userIdx) {
-        User user = userRepository.findById(userIdx)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public UserTempResponseDto getMyTemp(HttpServletRequest request) {
+        User user = getCurrentUser(request);
         return new UserTempResponseDto(user);
     }
 
     @PostMapping("/editInfo")
-    public ApiResponse<Void> updateUserInfo(@RequestParam Integer userIdx, @RequestBody UserInfoUpdateRequestDto requestDto) {
-        User user = userRepository.findById(userIdx)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ApiResponse<Void> updateUserInfo(HttpServletRequest request, @RequestBody UserInfoUpdateRequestDto requestDto) {
+        User user = getCurrentUser(request);
         
         user.setEmail(requestDto.getEmail());
         user.setPhoneNumber(requestDto.getPhoneNumber());
@@ -55,9 +61,8 @@ public class MypageController {
     }
 
     @PostMapping("/editPersonal")
-    public ApiResponse<Void> updateUserPersonal(@RequestParam Integer userIdx, @RequestBody UserPersonalUpdateRequestDto requestDto) {
-        User user = userRepository.findById(userIdx)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ApiResponse<Void> updateUserPersonal(HttpServletRequest request, @RequestBody UserPersonalUpdateRequestDto requestDto) {
+        User user = getCurrentUser(request);
         
         user.setNickname(requestDto.getNickname());
         user.setBio(requestDto.getBio());
@@ -69,9 +74,8 @@ public class MypageController {
     }
 
     @PostMapping("/withdraw")
-    public ApiResponse<Void> withdrawUser(@RequestParam Integer userIdx) {
-        User user = userRepository.findById(userIdx)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ApiResponse<Void> withdrawUser(HttpServletRequest request) {
+        User user = getCurrentUser(request);
         
         user.setStatus(0);
         userRepository.save(user);
