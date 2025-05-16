@@ -57,6 +57,9 @@ dependencies {
 
 	// MacOS용 Netty DNS 리졸버 의존성
 	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.107.Final:osx-aarch_64'
+
+	// AwS s3 의존성
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 tasks.named('test') {

@@ -48,9 +48,11 @@ public class User {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
-    @Builder.Default
     @Column(name = "status")
-    private Integer status=1;
+    private Integer status;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 
     @Builder.Default
     @Column(name = "user_temp")
