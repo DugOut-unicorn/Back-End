@@ -19,4 +19,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Integer findCheeringTeamIdByUserIdx(@Param("userIdx") Integer userIdx);
 
     Optional<User> findByEmail(String email);
+    boolean existsByNickname(String nickname);
 }
