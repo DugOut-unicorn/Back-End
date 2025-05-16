@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -55,4 +56,7 @@ public class MatchingPost {
 
     @Column(name = "is_matched", nullable = false)
     private Integer isMatched = 0;
+
+    @Column(name = "preferred_match_date")
+    private LocalDate preferredMatchDate;
 }

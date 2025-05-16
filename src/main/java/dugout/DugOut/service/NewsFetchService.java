@@ -56,20 +56,23 @@ public class NewsFetchService {
             // 제목
             String title = it.path("title").asText();
 
-            // oid, aid 로 기사 URL 조합
+            // oid, aid
             String oid = it.path("oid").asText();
             String aid = it.path("aid").asText();
+
+            // 모바일용 URL로 변경
             String link = String.format(
-                    "https://sports.news.naver.com/kbaseball/article/%s/%s",
+                    "https://m.sports.naver.com/baseball/news/read.nhn?oid=%s&aid=%s",
                     oid, aid
             );
 
-            // 이미지 (큰 이미지)
+            // 이미지 URL
             String img = it.path("image").asText("");
 
             list.add(new NewsResponse(title, link, img));
             if (list.size() >= 10) break;
         }
+
 
         return list;
     }

@@ -80,6 +80,15 @@ public class HomeController {
         return ResponseEntity.ok(ongoing);
     }
 
+    /**
+     * 오늘 일정된 경기 목록 조회
+     * GET /api/games/today
+     */
+    @GetMapping("/today-games")
+    public List<TodayGameListResponse> getTodayGames() {
+        return gameService.getTodayGames();
+    }
+
     // 최신 5개 매칭글 반환
     @GetMapping("/recent-matching-posts")
     public ResponseEntity<List<MatchingPostResponse>> getRecent() {
@@ -96,15 +105,13 @@ public class HomeController {
     }
 
 
-    //사용자가 응원하는 팀의 경기일 반환
-    @GetMapping("/users/{userId}/calendar/days")
-    public ResponseEntity<CalendarDateResponse> getGameDays(
-            @PathVariable("userId") Integer userId,
-            @RequestParam(value="month", required=false)
-            @DateTimeFormat(pattern="yyyy-MM") YearMonth month
+
+    @GetMapping("/calendar-games")
+    public ResponseEntity<CalendarGamesResponse> getMonthlyGames(
+            @RequestParam("month")
+            @DateTimeFormat(pattern="yyyy-MM") YearMonth ym
     ) {
-        YearMonth ym = (month != null ? month : YearMonth.now());
-        CalendarDateResponse resp = calendarService.getCalendarDays(userId, ym);
+        CalendarGamesResponse resp = calendarService.getMonthlyGames(ym);
         return ResponseEntity.ok(resp);
     }
 

@@ -23,8 +23,10 @@ public interface MatchingPostRepository extends JpaRepository<MatchingPost, Inte
         p.gameIdx,
         p.context,
         u.nickname,
+        u.cheeringTeamId,
         p.status,
-        p.createdAt
+        p.createdAt,
+        p.preferredMatchDate
       )
       from MatchingPost p
       join p.user u

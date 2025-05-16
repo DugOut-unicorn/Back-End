@@ -60,7 +60,7 @@ public class WeatherService {
                 case "SKY" -> {
                     sky = switch (val) {
                         case "1" -> "맑음";
-                        case "3" -> "구름많음";
+                        case "3" -> "구름 많음";
                         case "4" -> "흐림";
                         default  -> "알수없음";
                     };
