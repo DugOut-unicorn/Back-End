@@ -141,10 +141,10 @@ public class LoginController {
             User user = getUserFromToken(request);
             
             if (nicknameRequest.getNickname() == null || nicknameRequest.getNickname().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error(ErrorResponse.NICKNAME_REQUIRED));
-            }
-
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(ErrorResponse.NICKNAME_REQUIRED));
+        }
+        
             String newNickname = nicknameRequest.getNickname().trim();
             
             // 현재 사용자의 닉네임과 동일한 경우는 중복으로 처리하지 않음
@@ -262,16 +262,16 @@ public class LoginController {
             if (cheeringTeamRequest.getCheeringTeamId() == null) {
                 return ResponseEntity.badRequest()
                         .body(ApiResponse.error(ErrorResponse.CHEERING_TEAM_REQUIRED));
-            }
-            
+        }
+        
             if (cheeringTeamRequest.getCheeringTeamId() < 1 || cheeringTeamRequest.getCheeringTeamId() > 10) {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error(ErrorResponse.CHEERING_TEAM_RANGE));
-            }
-            
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(ErrorResponse.CHEERING_TEAM_RANGE));
+        }
+        
             user.setCheeringTeamId(cheeringTeamRequest.getCheeringTeamId());
             userRepository.save(user);
-            
+                
             return ResponseEntity.ok(ApiResponse.success(SuccessResponse.CHEERING_TEAM_UPDATED));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()

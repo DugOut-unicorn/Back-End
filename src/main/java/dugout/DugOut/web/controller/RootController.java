@@ -36,7 +36,7 @@ public class RootController {
             @RequestParam("playerIdx") Integer playerIdx,
             @RequestParam("file") MultipartFile file) {
         try {
-            Player player = playerRepository.findById(playerIdx)
+            Player player = playerRepository.findById(playerIdx.longValue())
                     .orElseThrow(() -> new RuntimeException("선수를 찾을 수 없습니다."));
 
             // 기존 이미지가 있다면 삭제
