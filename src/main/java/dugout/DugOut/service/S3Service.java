@@ -42,6 +42,26 @@ public class S3Service {
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
 
+    public String uploadPlayerImage(MultipartFile file, Integer playerIdx) throws IOException {
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String fileName = "players/" + playerIdx + "/" + UUID.randomUUID().toString() + extension;
+
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(file.getContentType());
+        metadata.setContentLength(file.getSize());
+
+        PutObjectRequest request = new PutObjectRequest(
+                bucket,
+                fileName,
+                file.getInputStream(),
+                metadata
+        );
+
+        amazonS3Client.putObject(request);
+        return amazonS3Client.getUrl(bucket, fileName).toString();
+    }
+
     public void deleteProfileImage(String imageUrl) {
         try {
             String key = imageUrl.substring(imageUrl.indexOf(bucket) + bucket.length() + 1);
