@@ -39,7 +39,7 @@ public class MypageController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    @GetMapping("/myChat")
+    @GetMapping("/myPost")
     public List<MatchingPostResponseDto> getMyChats(HttpServletRequest request) {
         User user = getCurrentUser(request);
         List<MatchingPost> matchingPosts = matchingPostRepository.findByUserIdx(user.getUserIdx());
@@ -58,18 +58,18 @@ public class MypageController {
     public ApiResponse<Void> updateUserInfo(HttpServletRequest request, @RequestBody UserInfoUpdateRequestDto requestDto) {
         try {
             User user = getCurrentUser(request);
-            
+
             // 생년월일 검증 및 변환
             if (requestDto.getBirth() != null) {
                 String birth = requestDto.getBirth();
                 if (birth.length() != 8) {
                     return ApiResponse.error("생년월일은 8자리 숫자여야 합니다.");
                 }
-                
+
                 int year = Integer.parseInt(birth.substring(0, 4));
                 int month = Integer.parseInt(birth.substring(4, 6));
                 int day = Integer.parseInt(birth.substring(6, 8));
-                
+
                 try {
                     LocalDate birthDate = LocalDate.of(year, month, day);
                     user.setBirth(birthDate);
@@ -77,7 +77,7 @@ public class MypageController {
                     return ApiResponse.error("유효하지 않은 생년월일입니다.");
                 }
             }
-            
+
             // 성별 업데이트
             if (requestDto.getGender() != null) {
                 String gender = requestDto.getGender();
@@ -86,7 +86,7 @@ public class MypageController {
                 }
                 user.setGender(gender.equals("0") ? User.Gender.M : User.Gender.F);
             }
-            
+
             // 전화번호 업데이트
             if (requestDto.getPhoneNumber() != null) {
                 if (requestDto.getPhoneNumber().length() > 14) {
@@ -97,9 +97,9 @@ public class MypageController {
                 }
                 user.setPhoneNumber(requestDto.getPhoneNumber());
             }
-            
+
             userRepository.save(user);
-            
+
             return ApiResponse.success("사용자 정보가 성공적으로 업데이트되었습니다.");
         } catch (Exception e) {
             return ApiResponse.error("사용자 정보 업데이트에 실패했습니다.");
@@ -109,23 +109,23 @@ public class MypageController {
     @PostMapping("/editPersonal")
     public ApiResponse<Void> updateUserPersonal(HttpServletRequest request, @RequestBody UserPersonalUpdateRequestDto requestDto) {
         User user = getCurrentUser(request);
-        
+
         user.setNickname(requestDto.getNickname());
         user.setBio(requestDto.getBio());
         user.setCheeringTeamId(requestDto.getCheeringTeamId());
-        
+
         userRepository.save(user);
-        
+
         return ApiResponse.success("사용자 개인정보가 성공적으로 업데이트되었습니다.");
     }
 
     @PostMapping("/withdraw")
     public ApiResponse<Void> withdrawUser(HttpServletRequest request) {
         User user = getCurrentUser(request);
-        
+
         user.setStatus(0);
         userRepository.save(user);
-        
+
         return ApiResponse.success("회원탈퇴가 성공적으로 처리되었습니다.");
     }
 
@@ -135,7 +135,7 @@ public class MypageController {
             @RequestParam("file") MultipartFile file) {
         try {
             User user = getCurrentUser(request);
-            
+
             // 기존 프로필 이미지가 있다면 삭제
             if (user.getProfileImageUrl() != null) {
                 s3Service.deleteProfileImage(user.getProfileImageUrl());
@@ -143,7 +143,7 @@ public class MypageController {
 
             // 새 프로필 이미지 업로드
             String imageUrl = s3Service.uploadProfileImage(file, user.getEmail());
-            
+
             // 사용자 정보 업데이트
             user.setProfileImageUrl(imageUrl);
             userRepository.save(user);

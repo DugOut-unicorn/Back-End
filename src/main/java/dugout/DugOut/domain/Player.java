@@ -22,4 +22,7 @@ public class Player {
     
     @Column(name = "player_name", nullable = false, length = 20)
     private String playerName;
+    
+    @Column(name = "player_image_url")
+    private String playerImageUrl;
 } 
