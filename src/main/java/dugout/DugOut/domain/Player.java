@@ -34,4 +34,13 @@ public class Player {
 
     @Column(name = "sub_position", length = 10)
     private String sub_position;
+
+    @Column(name = "birthday")
+    private String birthday;
+
+    @Column(name = "height_weight")
+    private String heightWeight;
+
+    @Column(name = "career")
+    private String career;
 } 

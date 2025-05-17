@@ -15,4 +15,5 @@ public interface HitterStatRepository extends JpaRepository<HitterStat, Long> {
     List<HitterStat> findTop3ByTeamIdxOrderByAbDesc(Integer teamIdx);
     List<HitterStat> findTop3ByTeamIdxOrderByRDesc(Integer teamIdx);
     List<HitterStat> findTop3ByTeamIdxOrderByHDesc(Integer teamIdx);
+    HitterStat findByPlayerIdx(Integer playerIdx);
 } 
