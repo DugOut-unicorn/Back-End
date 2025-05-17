@@ -51,7 +51,7 @@ kma:
 # JWT 인증
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 86400000 # 24시간
+  expiration: 2592000000 # 30일 (24시간 * 60분 * 60초 * 1000밀리초 * 30일)
 
 # s3 정보
 cloud:
