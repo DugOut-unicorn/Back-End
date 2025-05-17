@@ -22,4 +22,6 @@ public interface PitcherStatRepository extends JpaRepository<PitcherStat, Long> 
     
     // 승리 상위 3명
     List<PitcherStat> findTop3ByTeamIdxOrderByWDesc(Integer teamIdx);
+    
+    PitcherStat findByPlayerIdx(Integer playerIdx);
 } 
