@@ -25,6 +25,10 @@ public class HitterStat {
     @Column(name = "team_idx", nullable = false)
     private Integer teamIdx;
     
+    @Column(name = "AVG", columnDefinition = "DECIMAL(4,3)")
+    private BigDecimal avg;
+    
+    @Column(name = "g", nullable = false)
     private Integer g;
     
     private Integer pa;

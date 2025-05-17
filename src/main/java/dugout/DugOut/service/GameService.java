@@ -2,6 +2,9 @@ package dugout.DugOut.service;
 
 import dugout.DugOut.domain.Game;
 import dugout.DugOut.repository.GameRepository;
+import dugout.DugOut.web.dto.response.TodayGameListResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -43,5 +46,17 @@ public class GameService {
      */
     public List<Game> getGamesInPeriod(LocalDateTime start, LocalDateTime end) {
         return gameRepository.findGamesByPeriod(start, end);
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(GameService.class);
+
+    public List<TodayGameListResponse> getTodayGames() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfToday    = today.atStartOfDay();
+        LocalDateTime startOfTomorrow = today.plusDays(1).atStartOfDay();
+
+        log.info("▶ 오늘 경기 조회 범위: {} 부터 {} 까지", startOfToday, startOfTomorrow);
+
+        return gameRepository.findTodayGames(startOfToday, startOfTomorrow);
     }
 }

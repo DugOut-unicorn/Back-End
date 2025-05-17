@@ -30,6 +30,9 @@ public class Game {
     @Column(name = "stadium_idx", nullable = false)
     private Integer stadiumIdx;
 
+    @Column(name = "start_time", nullable = false)
+    private Integer startTime;
+
     @Column(name = "date", nullable = false)
     private LocalDateTime date;
 

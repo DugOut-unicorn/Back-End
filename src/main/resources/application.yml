@@ -18,7 +18,7 @@ spring:
         format_sql: true
         use_sql_comments: true
         hbm2ddl:
-          auto: none
+          auto: update
         default_batch_fetch_size: 1000
 server:
   port: 8080
@@ -44,6 +44,27 @@ springdoc:
 
 # 날씨 데이터 설정
 kma:
-  base-url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
+  base-url: ${KMA_URL}
   service:
-    key: Nt3BF2GSZAFpHDA88bTZjwRo48oIV94CqEFptjRbEcdj9HIMU3gXfrIwCq6epzdPrO4hzbewvD8jTzTc95IM9g==
+    key: ${KMA_KEY}
+
+# JWT 인증
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 2592000000 # 30일 (24시간 * 60분 * 60초 * 1000밀리초 * 30일)
+
+# s3 정보
+cloud:
+  aws:
+    s3:
+      bucket: dugout-profile
+      path:
+        players: players
+        userProfile: userProfile
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${S3_ACCESSKEY}
+      secretKey: ${S3_SECRETKEY}

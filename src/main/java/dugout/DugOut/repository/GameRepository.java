@@ -1,12 +1,12 @@
 package dugout.DugOut.repository;
 
 import dugout.DugOut.domain.Game;
+import dugout.DugOut.web.dto.response.TodayGameListResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,6 +35,23 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
     List<Game> findGamesByPeriod(
             @Param("start") LocalDateTime start,
             @Param("end")   LocalDateTime end
+    );
+
+    @Query("""
+      select new dugout.DugOut.web.dto.response.TodayGameListResponse(
+        g.homeTeamIdx,
+        g.stadiumIdx,
+        g.awayTeamIdx,
+        g.startTime
+      )
+      from Game g
+      where g.date >= :startOfToday
+        and g.date <  :startOfTomorrow
+      order by g.startTime
+    """)
+    List<TodayGameListResponse> findTodayGames(
+            @Param("startOfToday")    LocalDateTime startOfToday,
+            @Param("startOfTomorrow") LocalDateTime startOfTomorrow
     );
 }
 

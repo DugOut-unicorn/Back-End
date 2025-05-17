@@ -24,6 +24,9 @@ public class PitcherStat {
     
     @Column(name = "teamIdx", nullable = false)
     private Integer teamIdx;
+
+    @Column(columnDefinition = "DECIMAL(4,2)")
+    private BigDecimal era;
     
     private Integer g;
     
