@@ -4,10 +4,12 @@ import dugout.DugOut.domain.HitterStat;
 import dugout.DugOut.domain.PitcherStat;
 import dugout.DugOut.domain.Player;
 import dugout.DugOut.domain.TeamRecord;
+import dugout.DugOut.domain.DefenseStat;
 import dugout.DugOut.repository.HitterStatRepository;
 import dugout.DugOut.repository.PitcherStatRepository;
 import dugout.DugOut.repository.PlayerRepository;
 import dugout.DugOut.repository.TeamRecordRepository;
+import dugout.DugOut.repository.DefenseStatRepository;
 import dugout.DugOut.web.dto.response.ApiResponse;
 import dugout.DugOut.web.dto.response.TopHitterResponseDto;
 import dugout.DugOut.web.dto.response.TopRbiHitterResponseDto;
@@ -23,6 +25,7 @@ import dugout.DugOut.web.dto.response.TopErPitcherResponseDto;
 import dugout.DugOut.web.dto.response.TopSvPitcherResponseDto;
 import dugout.DugOut.web.dto.response.TopWPitcherResponseDto;
 import dugout.DugOut.web.dto.response.PlayerResponseDto;
+import dugout.DugOut.web.dto.response.PersonalRecordResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,6 +34,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -48,6 +52,7 @@ public class RecordController {
     private final PitcherStatRepository pitcherStatRepository;
     private final PlayerRepository playerRepository;
     private final TeamRecordRepository teamRecordRepository;
+    private final DefenseStatRepository defenseStatRepository;
 
     @Operation(
         summary = "타율 상위 3명 조회",
@@ -1796,6 +1801,133 @@ public class RecordController {
                     .collect(Collectors.toList());
 
             return ApiResponse.success("포수 정보를 조회했습니다.", response);
+        } catch (Exception e) {
+            return ApiResponse.error("선수 정보 조회에 실패했습니다: " + e.getMessage());
+        }
+    }
+
+    @Operation(
+        summary = "선수 개인 정보 및 기록 조회",
+        description = "선수의 개인 정보와 포지션별 기록을 조회합니다.",
+        parameters = {
+            @Parameter(
+                name = "player_idx",
+                description = "선수 인덱스",
+                required = true,
+                schema = @Schema(type = "integer", example = "744")
+            )
+        }
+    )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "성공 응답",
+                        value = """
+                            {
+                                "success": true,
+                                "message": "선수 정보를 조회했습니다.",
+                                "data": {
+                                    "playerName": "김현수",
+                                    "teamIdx": 1,
+                                    "backNumber": 10,
+                                    "position": "투수",
+                                    "birthday": "1990-01-01",
+                                    "heightWeight": "180cm/80kg",
+                                    "career": "서울고-한양대",
+                                    "playerImageUrl": "https://example.com/image.jpg",
+                                    "pitcherStat": {
+                                        "era": 2.50,
+                                        "w": 15,
+                                        "l": 5,
+                                        "sv": 0,
+                                        "so": 150
+                                    },
+                                    "hasRecord": true
+                                }
+                            }"""
+                    )
+                }
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "잘못된 요청",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "실패 응답",
+                        value = """
+                            {
+                                "success": false,
+                                "message": "선수 정보 조회에 실패했습니다: 잘못된 선수 인덱스입니다."
+                            }"""
+                    )
+                }
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "선수 정보를 찾을 수 없음",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "실패 응답",
+                        value = """
+                            {
+                                "success": false,
+                                "message": "선수 정보 조회에 실패했습니다: 선수를 찾을 수 없습니다."
+                            }"""
+                    )
+                }
+            )
+        )
+    })
+    @GetMapping("/personal")
+    public ApiResponse<PersonalRecordResponseDto> getPersonalRecord(@RequestParam("player_idx") Long playerIdx) {
+        try {
+            // 선수 기본 정보 조회
+            Player player = playerRepository.findById(playerIdx)
+                    .orElseThrow(() -> new RuntimeException("선수를 찾을 수 없습니다."));
+
+            PersonalRecordResponseDto response = new PersonalRecordResponseDto();
+            response.setPlayerIdx(player.getPlayerIdx());
+            response.setPlayerName(player.getPlayerName());
+            response.setBackNumber(player.getBackNumber());
+            response.setPosition(player.getPosition());
+            response.setBirthday(player.getBirthday());
+            response.setHeightWeight(player.getHeightWeight());
+            response.setCareer(player.getCareer());
+            response.setPlayerImageUrl(player.getPlayerImageUrl());
+
+            // 포지션별 기록 조회
+            if ("투수".equals(player.getPosition())) {
+                PitcherStat pitcherStat = pitcherStatRepository.findByPlayerIdx(playerIdx.intValue());
+                if (pitcherStat != null) {
+                    response.setPitcherStat(pitcherStat);
+                    response.setHasRecord(true);
+                }
+            } else if ("타자".equals(player.getPosition())) {
+                HitterStat hitterStat = hitterStatRepository.findByPlayerIdx(playerIdx.intValue());
+                if (hitterStat != null) {
+                    response.setHitterStat(hitterStat);
+                    response.setHasRecord(true);
+                }
+            } else {
+                DefenseStat defenseStat = defenseStatRepository.findByPlayerIdx(playerIdx.intValue());
+                if (defenseStat != null) {
+                    response.setDefenseStat(defenseStat);
+                    response.setHasRecord(true);
+                }
+            }
+
+            return ApiResponse.success("선수 정보를 조회했습니다.", response);
         } catch (Exception e) {
             return ApiResponse.error("선수 정보 조회에 실패했습니다: " + e.getMessage());
         }
