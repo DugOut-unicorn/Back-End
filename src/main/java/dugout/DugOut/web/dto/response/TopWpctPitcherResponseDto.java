@@ -5,16 +5,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TopEraPitcherResponseDto {
+public class TopWpctPitcherResponseDto {
     private String playerName;
     private Integer backNumber;
-    private Double era;
+    private Double wpct;
     private String playerImageUrl;
 
-    public TopEraPitcherResponseDto(String playerName, Integer backNumber, Double era, String playerImageUrl) {
+    public TopWpctPitcherResponseDto(String playerName, Integer backNumber, Double wpct, String playerImageUrl) {
         this.playerName = playerName;
         this.backNumber = backNumber;
-        this.era = era;
+        this.wpct = wpct;
         this.playerImageUrl = playerImageUrl;
     }
 } 

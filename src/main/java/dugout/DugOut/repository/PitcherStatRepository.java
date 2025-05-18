@@ -2,6 +2,7 @@ package dugout.DugOut.repository;
 
 import dugout.DugOut.domain.PitcherStat;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,4 +25,16 @@ public interface PitcherStatRepository extends JpaRepository<PitcherStat, Long> 
     List<PitcherStat> findTop3ByTeamIdxOrderByWDesc(Integer teamIdx);
     
     PitcherStat findByPlayerIdx(Integer playerIdx);
+
+    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY CAST(ps.w AS double) / NULLIF(ps.w + ps.l, 0) DESC")
+    List<PitcherStat> findTop3PitchersByWpct();
+
+    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY ps.era ASC")
+    List<PitcherStat> findTop3PitchersByEra();
+
+    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY ps.so DESC")
+    List<PitcherStat> findTop3PitchersBySo();
+
+    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY ps.sv DESC")
+    List<PitcherStat> findTop3PitchersBySv();
 } 
