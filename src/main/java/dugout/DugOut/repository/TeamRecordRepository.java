@@ -24,4 +24,7 @@ public interface TeamRecordRepository extends JpaRepository<TeamRecord, Long> {
 
     @Query("SELECT t FROM TeamRecord t WHERE t.date = :date AND t.teamIdx = :teamIdx")
     TeamRecord findByDateAndTeamIdx(@Param("date") LocalDate date, @Param("teamIdx") Integer teamIdx);
+
+    @Query("SELECT tr FROM TeamRecord tr WHERE tr.date = (SELECT MAX(tr2.date) FROM TeamRecord tr2) ORDER BY tr.winRate DESC")
+    List<TeamRecord> findTop10ByLatestDateOrderByWinRateDesc();
 }

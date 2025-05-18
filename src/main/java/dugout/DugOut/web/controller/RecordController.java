@@ -26,6 +26,7 @@ import dugout.DugOut.web.dto.response.TopSvPitcherResponseDto;
 import dugout.DugOut.web.dto.response.TopWPitcherResponseDto;
 import dugout.DugOut.web.dto.response.PlayerResponseDto;
 import dugout.DugOut.web.dto.response.PersonalRecordResponseDto;
+import dugout.DugOut.web.dto.response.TeamRankResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -1930,6 +1931,88 @@ public class RecordController {
             return ApiResponse.success("선수 정보를 조회했습니다.", response);
         } catch (Exception e) {
             return ApiResponse.error("선수 정보 조회에 실패했습니다: " + e.getMessage());
+        }
+    }
+
+    @Operation(
+        summary = "팀 순위 조회",
+        description = "최신 날짜 기준으로 10개 팀의 순위 정보를 조회합니다."
+    )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "성공 응답",
+                        value = """
+                            {
+                                "success": true,
+                                "message": "팀 순위 정보를 조회했습니다.",
+                                "data": [
+                                    {
+                                        "teamIdx": 1,
+                                        "game": 120,
+                                        "win": 65,
+                                        "draw": 5,
+                                        "lose": 50,
+                                        "winRate": 0.542,
+                                        "gameGap": 0.0,
+                                        "streak": "W3",
+                                        "recentTen": "7승3패"
+                                    }
+                                ]
+                            }"""
+                    )
+                }
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "기록을 찾을 수 없음",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "실패 응답",
+                        value = """
+                            {
+                                "success": false,
+                                "message": "팀 순위 정보 조회에 실패했습니다: 기록이 없습니다."
+                            }"""
+                    )
+                }
+            )
+        )
+    })
+    @GetMapping("/teamRank")
+    public ApiResponse<List<TeamRankResponseDto>> getTeamRank() {
+        try {
+            List<TeamRecord> teamRecords = teamRecordRepository.findTop10ByLatestDateOrderByWinRateDesc();
+            
+            if (teamRecords.isEmpty()) {
+                return ApiResponse.error("팀 순위 정보 조회에 실패했습니다: 기록이 없습니다.");
+            }
+
+            List<TeamRankResponseDto> response = teamRecords.stream()
+                    .map(record -> new TeamRankResponseDto(
+                            record.getTeamIdx(),
+                            record.getGame(),
+                            record.getWin(),
+                            record.getDraw(),
+                            record.getLose(),
+                            record.getWinRate().doubleValue(),
+                            record.getGameGap().doubleValue(),
+                            record.getStreak(),
+                            record.getRecentTen()
+                    ))
+                    .toList();
+
+            return ApiResponse.success("팀 순위 정보를 조회했습니다.", response);
+        } catch (Exception e) {
+            return ApiResponse.error("팀 순위 정보 조회에 실패했습니다: " + e.getMessage());
         }
     }
 } 
