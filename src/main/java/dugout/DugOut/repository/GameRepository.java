@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,21 +38,12 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
             @Param("end")   LocalDateTime end
     );
 
+    // --- 해당 날짜의 모든 경기 조회
     @Query("""
-      select new dugout.DugOut.web.dto.response.TodayGameListResponse(
-        g.homeTeamIdx,
-        g.stadiumIdx,
-        g.awayTeamIdx,
-        g.startTime
-      )
-      from Game g
-      where g.date >= :startOfToday
-        and g.date <  :startOfTomorrow
-      order by g.startTime
+        SELECT g 
+        FROM Game g 
+        WHERE function('DATE', g.date) = :date 
     """)
-    List<TodayGameListResponse> findTodayGames(
-            @Param("startOfToday")    LocalDateTime startOfToday,
-            @Param("startOfTomorrow") LocalDateTime startOfTomorrow
-    );
-}
+    List<Game> findGamesByDate(@Param("date") LocalDate date);
+    };
 

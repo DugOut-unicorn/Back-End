@@ -80,14 +80,14 @@ public class HomeController {
         return ResponseEntity.ok(ongoing);
     }
 
-    /**
-     * 오늘 일정된 경기 목록 조회
-     * GET /api/games/today
-     */
-    @GetMapping("/today-games")
-    public List<TodayGameListResponse> getTodayGames() {
-        return gameService.getTodayGames();
-    }
+//    /**
+//     * 오늘 일정된 경기 목록 조회
+//     * GET /api/games/today
+//     */
+//    @GetMapping("/today-games")
+//    public List<TodayGameListResponse> getTodayGames() {
+//        return gameService.getTodayGames();
+//    }
 
     // 최신 5개 매칭글 반환
     @GetMapping("/recent-matching-posts")
