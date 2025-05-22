@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = {
-        "http://localhost:3000",
-        "https://dug-out.store",},   // 리액트 배포 URL
-        allowedHeaders = "*",
-        methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
 @RequestMapping("/home")
 @RequiredArgsConstructor
 @Tag(name = "/home", description = "홈 화면 API")
@@ -85,14 +80,14 @@ public class HomeController {
         return ResponseEntity.ok(ongoing);
     }
 
-    /**
-     * 오늘 일정된 경기 목록 조회
-     * GET /api/games/today
-     */
-    @GetMapping("/today-games")
-    public List<TodayGameListResponse> getTodayGames() {
-        return gameService.getTodayGames();
-    }
+//    /**
+//     * 오늘 일정된 경기 목록 조회
+//     * GET /api/games/today
+//     */
+//    @GetMapping("/today-games")
+//    public List<TodayGameListResponse> getTodayGames() {
+//        return gameService.getTodayGames();
+//    }
 
     // 최신 5개 매칭글 반환
     @GetMapping("/recent-matching-posts")
