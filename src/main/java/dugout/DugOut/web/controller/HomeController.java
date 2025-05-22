@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = {
-        "http://localhost:3000",
-        "https://dug-out.store",},   // 리액트 배포 URL
-        allowedHeaders = "*",
-        methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
 @RequestMapping("/home")
 @RequiredArgsConstructor
 @Tag(name = "/home", description = "홈 화면 API")
