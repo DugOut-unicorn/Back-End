@@ -1,6 +1,16 @@
 spring:
   application:
     name: DugOut
+  mvc:
+    cors:
+      mappings:
+        /api/**:
+          allowed-origins:
+            - "http://localhost:3000"
+            - "https://dug-out.store"
+          allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+          allowed-headers: "*"
+          allow-credentials: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
