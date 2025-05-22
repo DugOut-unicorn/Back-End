@@ -51,4 +51,20 @@ kma:
 # JWT 인증
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 86400000 # 24시간
+  expiration: 2592000000 # 30일 (24시간 * 60분 * 60초 * 1000밀리초 * 30일)
+
+# s3 정보
+cloud:
+  aws:
+    s3:
+      bucket: dugout-profile
+      path:
+        players: players
+        userProfile: userProfile
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${S3_ACCESSKEY}
+      secretKey: ${S3_SECRETKEY}
