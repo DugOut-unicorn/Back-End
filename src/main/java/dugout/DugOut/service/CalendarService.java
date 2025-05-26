@@ -77,6 +77,7 @@ public class CalendarService {
             int day = g.getDate().toLocalDate().getDayOfMonth();
             CalendarGamesResponse.GameDetailDto detail = new CalendarGamesResponse.GameDetailDto(
                     g.getGameIdx(),
+                    g.getDate().toLocalDate(),
                     nameMap.get(g.getHomeTeamIdx()),
                     nameMap.get(g.getAwayTeamIdx()),
                     g.getStartTime()

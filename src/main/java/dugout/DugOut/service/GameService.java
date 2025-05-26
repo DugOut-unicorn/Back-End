@@ -64,6 +64,7 @@ public class GameService {
 
                     return new GameListResponse.GameDto(
                             game.getGameIdx(),
+                            date,
                             homeName,
                             awayName,
                             stadiumName,

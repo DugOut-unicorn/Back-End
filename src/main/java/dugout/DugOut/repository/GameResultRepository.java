@@ -39,5 +39,7 @@ public interface GameResultRepository extends JpaRepository<GameResult, Long> {
             LocalDate matchDate,
             int limit
     );
+
+    boolean existsByGameIdx(Integer gameIdx);
 }
 

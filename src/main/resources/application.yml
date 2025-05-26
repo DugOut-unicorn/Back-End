@@ -68,3 +68,8 @@ cloud:
     credentials:
       accessKey: ${S3_ACCESSKEY}
       secretKey: ${S3_SECRETKEY}
+
+
+crawl:
+  url-schedule: https://www.koreabaseball.com/ws/Schedule.asmx/GetScheduleList
+
