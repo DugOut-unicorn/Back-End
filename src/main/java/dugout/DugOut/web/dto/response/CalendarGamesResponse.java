@@ -24,9 +24,9 @@ public class CalendarGamesResponse {
     @AllArgsConstructor
     public static class GameDetailDto {
         private final Integer gameIdx;
-        private final LocalDate date;
         private final String  homeTeamName;
         private final String  awayTeamName;
+        private final String  stadiumName;
         private final Integer startTime;
     }
 }

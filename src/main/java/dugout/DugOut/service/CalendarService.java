@@ -2,6 +2,7 @@ package dugout.DugOut.service;
 
 import dugout.DugOut.domain.Game;
 import dugout.DugOut.domain.Team;
+import dugout.DugOut.domain.enums.Stadium;
 import dugout.DugOut.repository.GameRepository;
 import dugout.DugOut.repository.TeamRepository;
 import dugout.DugOut.web.dto.response.CalendarGamesResponse;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,14 +22,14 @@ public class CalendarService {
     private final TeamRepository teamRepo;
 
     public CalendarService(GameRepository gameRepo, TeamRepository teamRepo) {
-        this.teamRepo = teamRepo;
         this.gameRepo = gameRepo;
+        this.teamRepo = teamRepo;
     }
-
 
     /**
      * 프론트에서 받은 YearMonth(yyyy-MM) 기준으로
-     * 그 달에 잡힌 모든 경기(또는 optional day/cheeringTeamIdx에 해당하는 경기) 날짜와 팀 이름을 반환
+     * 그 달에 잡힌 모든 경기(또는 optional day/cheeringTeamIdx에 해당하는 경기)
+     * 날짜와 팀 이름, 구장 이름, 경기 날짜(문자열)까지 반환
      */
     public CalendarGamesResponse getMonthlyGames(
             YearMonth ym,
@@ -35,10 +37,8 @@ public class CalendarService {
             @Nullable Integer cheeringTeamIdx
     ) {
         // 1) 조회 기간 계산
-        LocalDateTime start;
-        LocalDateTime end;
+        LocalDateTime start, end;
         if (dayOfMonth != null) {
-            // day 유효성 검사
             if (dayOfMonth < 1 || dayOfMonth > ym.lengthOfMonth()) {
                 throw new IllegalArgumentException(
                         String.format("Invalid dayOfMonth: %d for YearMonth %s", dayOfMonth, ym)
@@ -54,7 +54,7 @@ public class CalendarService {
         // 2) 기간 내 Game 엔티티 로드
         List<Game> games = gameRepo.findGamesByPeriod(start, end);
 
-        // 3) cheeringTeamIdx가 있으면 해당 팀의 홈/어웨이 경기만 필터링
+        // 3) cheeringTeamIdx 필터링
         if (cheeringTeamIdx != null) {
             games = games.stream()
                     .filter(g ->
@@ -64,29 +64,48 @@ public class CalendarService {
                     .collect(Collectors.toList());
         }
 
-        // 4) 팀 이름 매핑 한 번에 가져오기
+        // 4) 팀 이름 매핑
         Set<Integer> teamIds = games.stream()
                 .flatMap(g -> Stream.of(g.getHomeTeamIdx(), g.getAwayTeamIdx()))
                 .collect(Collectors.toSet());
         Map<Integer, String> nameMap = teamRepo.findAllById(teamIds).stream()
                 .collect(Collectors.toMap(Team::getTeamIdx, Team::getTeamName));
 
-        // 5) dayOfMonth(또는 모든 날짜) 별 그룹핑 & DTO 변환
+        // 5) 구장 이름 매핑 (enum)
+        Map<Integer, String> stadiumNameMap = games.stream()
+                .map(Game::getStadiumIdx)
+                .distinct()
+                .collect(Collectors.toMap(
+                        idx -> idx,
+                        Stadium::getNameByIdx
+                ));
+
+        // 6) 날짜별 DTO 생성
         Map<Integer, List<CalendarGamesResponse.GameDetailDto>> byDay = new TreeMap<>();
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
         for (Game g : games) {
             int day = g.getDate().toLocalDate().getDayOfMonth();
-            CalendarGamesResponse.GameDetailDto detail = new CalendarGamesResponse.GameDetailDto(
-                    g.getGameIdx(),
-                    g.getDate().toLocalDate(),
-                    nameMap.get(g.getHomeTeamIdx()),
-                    nameMap.get(g.getAwayTeamIdx()),
-                    g.getStartTime()
-            );
+
+            String homeName    = nameMap.get(g.getHomeTeamIdx());
+            String awayName    = nameMap.get(g.getAwayTeamIdx());
+            String stadiumName = stadiumNameMap.get(g.getStadiumIdx());
+            Integer startTime  = g.getStartTime();
+
+            CalendarGamesResponse.GameDetailDto detail =
+                    new CalendarGamesResponse.GameDetailDto(
+                            g.getGameIdx(),
+                            homeName,
+                            awayName,
+                            stadiumName,
+                            startTime
+                    );
+
             byDay.computeIfAbsent(day, d -> new ArrayList<>())
                     .add(detail);
         }
 
-        // 6) Map → List<DayGamesDto>
+        // 7) 최종 응답 리스트로 변환
         List<CalendarGamesResponse.DayGamesDto> days = byDay.entrySet().stream()
                 .map(e -> new CalendarGamesResponse.DayGamesDto(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
@@ -95,6 +114,4 @@ public class CalendarService {
                 ym.getYear(), ym.getMonthValue(), days
         );
     }
-
-
 }
