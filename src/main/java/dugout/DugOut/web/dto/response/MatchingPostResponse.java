@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class MatchingPostResponse {
-    private final Integer postIdx;
+    private final Long postIdx;
     private final String title;
     private final Integer stadiumIdx;
     private final Integer gameIdx;
@@ -24,7 +24,7 @@ public class MatchingPostResponse {
      *  순서: postIdx, title, stadiumIdx, gameIdx, context, userNickname, status, createdAt
      */
     public MatchingPostResponse(
-            Integer postIdx,
+            Long postIdx,
             String title,
             Integer stadiumIdx,
             Integer gameIdx,

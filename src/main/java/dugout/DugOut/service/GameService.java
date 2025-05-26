@@ -1,15 +1,16 @@
 package dugout.DugOut.service;
 
 import dugout.DugOut.domain.Game;
+import dugout.DugOut.domain.enums.Stadium;
+import dugout.DugOut.domain.enums.Team;
 import dugout.DugOut.repository.GameRepository;
-import dugout.DugOut.web.dto.response.TodayGameListResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dugout.DugOut.web.dto.response.GameListResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -18,6 +19,7 @@ public class GameService {
 
     public GameService(GameRepository gameRepository) {
         this.gameRepository = gameRepository;
+
     }
 
     /**
@@ -37,26 +39,37 @@ public class GameService {
         return gameRepository.findOngoingByPeriod(startOfDay, endOfDayOrNow);
     }
 
-
     /**
-     * 임의의 기간(start~end)에 포함된 모든 Game 엔티티를 조회
+     * 지정된 날짜에 해당하는 모든 경기 조회
      *
-     * @param start 시작 시각 (inclusive)
-     * @param end   종료 시각 (inclusive)
+     * @param date 날짜 (yyyy-MM-dd)
      */
-    public List<Game> getGamesInPeriod(LocalDateTime start, LocalDateTime end) {
-        return gameRepository.findGamesByPeriod(start, end);
-    }
+    public List<GameListResponse.GameDto> getGamesByDate(LocalDate date) {
 
-    private static final Logger log = LoggerFactory.getLogger(GameService.class);
+        List<Game> games = gameRepository.findGamesByDate(date);
 
-    public List<TodayGameListResponse> getTodayGames() {
-        LocalDate today = LocalDate.now();
-        LocalDateTime startOfToday    = today.atStartOfDay();
-        LocalDateTime startOfTomorrow = today.plusDays(1).atStartOfDay();
 
-        log.info("▶ 오늘 경기 조회 범위: {} 부터 {} 까지", startOfToday, startOfTomorrow);
+        return games.stream()
+                .map(game -> {
+                    // 1) Team enum 에서 팀 이름 조회
+                    String homeName = Team.getNameByIdx(game.getHomeTeamIdx());
+                    String awayName = Team.getNameByIdx(game.getAwayTeamIdx());
 
-        return gameRepository.findTodayGames(startOfToday, startOfTomorrow);
+                    // 2) Stadium enum 에서 구장 이름 조회
+                    String stadiumName = Stadium.getNameByIdx(game.getStadiumIdx());
+
+                    // 3) startTime(int) → "HH:mm" 포맷
+                    int raw = game.getStartTime();        // ex. 1300
+                    String startTime = String.format("%02d:%02d", raw / 100, raw % 100);
+
+                    return new GameListResponse.GameDto(
+                            game.getGameIdx(),
+                            homeName,
+                            awayName,
+                            stadiumName,
+                            startTime
+                    );
+                })
+                .toList();
     }
 }

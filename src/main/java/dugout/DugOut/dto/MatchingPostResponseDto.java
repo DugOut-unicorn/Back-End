@@ -7,14 +7,14 @@ import java.time.LocalDateTime;
 
 @Getter
 public class MatchingPostResponseDto {
-    private final Integer matchingPostIdx;
+    private final Long matchingPostIdx;
     private final Integer userIdx;
     private final Integer gameIdx;
     private final Integer stadiumIdx;
     private final Integer teamIdx;
     private final String title;
     private final String context;
-    private final Integer haveTicket;
+    private final Boolean haveTicket;
     private final LocalDateTime createdAt;
     private final Integer status;
     private final Integer isMatched;
@@ -24,7 +24,7 @@ public class MatchingPostResponseDto {
         this.userIdx = matchingPost.getUserIdx();
         this.gameIdx = matchingPost.getGameIdx();
         this.stadiumIdx = matchingPost.getStadiumIdx();
-        this.teamIdx = matchingPost.getTeamIdx();
+        this.teamIdx = matchingPost.getCheeringTeamIdx();
         this.title = matchingPost.getTitle();
         this.context = matchingPost.getContext();
         this.haveTicket = matchingPost.getHaveTicket();

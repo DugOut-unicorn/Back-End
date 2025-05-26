@@ -7,9 +7,11 @@ import dugout.DugOut.web.dto.response.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -22,11 +24,6 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = {
-        "http://localhost:3000",
-        "https://dug-out.store",},   // 리액트 배포 URL
-        allowedHeaders = "*",
-        methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
 @RequestMapping("/home")
 @RequiredArgsConstructor
 @Tag(name = "/home", description = "홈 화면 API")
@@ -85,14 +82,14 @@ public class HomeController {
         return ResponseEntity.ok(ongoing);
     }
 
-    /**
-     * 오늘 일정된 경기 목록 조회
-     * GET /api/games/today
-     */
-    @GetMapping("/today-games")
-    public List<TodayGameListResponse> getTodayGames() {
-        return gameService.getTodayGames();
-    }
+//    /**
+//     * 오늘 일정된 경기 목록 조회
+//     * GET /api/games/today
+//     */
+//    @GetMapping("/today-games")
+//    public List<TodayGameListResponse> getTodayGames() {
+//        return gameService.getTodayGames();
+//    }
 
     // 최신 5개 매칭글 반환
     @GetMapping("/recent-matching-posts")
@@ -109,14 +106,38 @@ public class HomeController {
         return ResponseEntity.ok(ranking);
     }
 
-
-
+    // 월별/일별 경기 일정 반환
     @GetMapping("/calendar-games")
-    public ResponseEntity<CalendarGamesResponse> getMonthlyGames(
+    public ResponseEntity<CalendarGamesResponse> getCalendarGames(
             @RequestParam("month")
-            @DateTimeFormat(pattern="yyyy-MM") YearMonth ym
+            @DateTimeFormat(pattern = "yyyy-MM") YearMonth ym,
+
+            @RequestParam(value = "day", required = false) Integer dayOfMonth,
+
+            @RequestParam(value = "cheeringTeamIdx", required = false) Integer cheeringTeamIdx
     ) {
-        CalendarGamesResponse resp = calendarService.getMonthlyGames(ym);
+        // day 파라미터 유효성 검사
+        if (dayOfMonth != null) {
+            if (dayOfMonth < 1 || dayOfMonth > ym.lengthOfMonth()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        String.format("유효하지 않은 day 값: %d (월: %s)", dayOfMonth, ym)
+                );
+            }
+        }
+
+        // 2) cheeringTeamIdx 유효성 검사 (예: 양수만 허용)
+        if (cheeringTeamIdx != null && cheeringTeamIdx < 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "유효하지 않은 cheeringTeamIdx 값: " + cheeringTeamIdx
+            );
+        }
+
+        // 3) 서비스 호출: month, dayOfMonth, cheeringTeamIdx 모두 넘김
+        CalendarGamesResponse resp =
+                calendarService.getMonthlyGames(ym, dayOfMonth, cheeringTeamIdx);
+
         return ResponseEntity.ok(resp);
     }
 

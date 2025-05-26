@@ -27,7 +27,7 @@ public class WeatherService {
                                 .map(resp -> parseAll(resp, stadium))
                                 .doOnError(e ->
                                         log.error("[WEATHER ERROR] stadium={}({}, cause={})",
-                                                stadium.getName(), stadium.getId(), e.getMessage()))
+                                                stadium.getName(), stadium.getIdx(), e.getMessage()))
                                 .onErrorResume(e -> Mono.empty())
                 );
     }
@@ -70,7 +70,7 @@ public class WeatherService {
         }
 
         return StadiumWeatherDto.builder()
-                .stadiumId(stadium.getId())
+                .stadiumId(stadium.getIdx())
                 .stadiumName(stadium.getName())
                 .temperature(temp)
                 .humidity(hum)
