@@ -16,7 +16,6 @@ public class GameListResponse {
     @AllArgsConstructor
     public static class GameDto {
         private final Integer gameIdx;
-        private LocalDate date;
         private final String homeTeamName;
         private final String awayTeamName;
         private final String stadium;
