@@ -108,7 +108,6 @@ public class KakaoService {
                             existingUser -> {
                                 log.info("[ Kakao Service ] Found existing user: {}", existingUser);
                                 existingUser.setName(name);
-                                existingUser.setNickname(nickname);
                                 User savedUser = userRepository.save(existingUser);
                                 log.info("[ Kakao Service ] Updated existing user: {}", savedUser);
                             },

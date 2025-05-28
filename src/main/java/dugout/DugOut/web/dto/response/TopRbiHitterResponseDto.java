@@ -9,4 +9,5 @@ public class TopRbiHitterResponseDto {
     private String playerName;
     private Integer rbi;
     private String playerImageUrl;
+    private Integer playerIdx;
 } 
