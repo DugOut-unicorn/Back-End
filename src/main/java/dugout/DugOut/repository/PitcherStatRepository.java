@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PitcherStatRepository extends JpaRepository<PitcherStat, Long> {
+public interface PitcherStatRepository extends JpaRepository<PitcherStat, Integer> {
     // 평균자책점 하위 3명
     List<PitcherStat> findTop3ByTeamIdxOrderByEraAsc(Integer teamIdx);
     
@@ -26,15 +26,18 @@ public interface PitcherStatRepository extends JpaRepository<PitcherStat, Long> 
     
     PitcherStat findByPlayerIdx(Integer playerIdx);
 
-    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY CAST(ps.w AS double) / NULLIF(ps.w + ps.l, 0) DESC")
+    @Query("SELECT p FROM PitcherStat p ORDER BY p.er DESC LIMIT 3")
+    List<PitcherStat> findTop3PitchersByEr();
+
+    @Query("SELECT p FROM PitcherStat p WHERE p.w + p.l > 0 ORDER BY (CAST(p.w AS double) / (p.w + p.l)) DESC LIMIT 3")
     List<PitcherStat> findTop3PitchersByWpct();
 
-    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY ps.era ASC")
+    @Query("SELECT p FROM PitcherStat p ORDER BY p.era ASC LIMIT 3")
     List<PitcherStat> findTop3PitchersByEra();
 
-    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY ps.so DESC")
+    @Query("SELECT p FROM PitcherStat p ORDER BY p.so DESC LIMIT 3")
     List<PitcherStat> findTop3PitchersBySo();
 
-    @Query("SELECT ps FROM PitcherStat ps JOIN Player p ON ps.playerIdx = p.playerIdx WHERE p.position = '투수' ORDER BY ps.sv DESC")
+    @Query("SELECT p FROM PitcherStat p ORDER BY p.sv DESC LIMIT 3")
     List<PitcherStat> findTop3PitchersBySv();
 } 

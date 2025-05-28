@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface HitterStatRepository extends JpaRepository<HitterStat, Long> {
+public interface HitterStatRepository extends JpaRepository<HitterStat, Integer> {
     List<HitterStat> findTop3ByTeamIdxOrderByAvgDesc(Integer teamIdx);
     List<HitterStat> findTop3ByTeamIdxOrderByRbiDesc(Integer teamIdx);
     List<HitterStat> findTop3ByTeamIdxOrderByGDesc(Integer teamIdx);
@@ -18,9 +18,12 @@ public interface HitterStatRepository extends JpaRepository<HitterStat, Long> {
     List<HitterStat> findTop3ByTeamIdxOrderByHDesc(Integer teamIdx);
     HitterStat findByPlayerIdx(Integer playerIdx);
 
-    @Query("SELECT hs FROM HitterStat hs JOIN Player p ON hs.playerIdx = p.playerIdx ORDER BY hs.avg DESC")
-    List<HitterStat> findTop3HittersByAvg();
+    @Query("SELECT h FROM HitterStat h ORDER BY h.pa DESC LIMIT 3")
+    List<HitterStat> findTop3HittersByPa();
 
-    @Query("SELECT hs FROM HitterStat hs JOIN Player p ON hs.playerIdx = p.playerIdx ORDER BY hs.rbi DESC")
+    @Query("SELECT h FROM HitterStat h ORDER BY h.rbi DESC LIMIT 3")
     List<HitterStat> findTop3HittersByRbi();
+
+    @Query("SELECT h FROM HitterStat h ORDER BY h.avg DESC LIMIT 3")
+    List<HitterStat> findTop3HittersByAvg();
 } 
