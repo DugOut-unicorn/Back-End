@@ -8,6 +8,7 @@ import dugout.DugOut.service.ChatService;
 import dugout.DugOut.service.JwtService;
 import dugout.DugOut.web.dto.ChatMessageDto;
 import dugout.DugOut.web.dto.request.CreateChatRoomRequest;
+import dugout.DugOut.web.dto.response.ChatHistoryResponse;
 import dugout.DugOut.web.dto.response.ChatMessageResponse;
 import dugout.DugOut.web.dto.response.ChatRoomResponse;
 import dugout.DugOut.web.dto.response.CreateChatRoomResponse;
@@ -83,20 +84,23 @@ public class ChatController {
     }
 
     // 과거 메시지 조회 REST API
-    @GetMapping("/api/chat/history")
+    @GetMapping("/history")
     @ResponseBody
-    public List<ChatMessageResponse> history(
-            @RequestParam("otherUserId") int otherUserId,
-            HttpServletRequest requset) {
+    public ChatHistoryResponse history(
+            @RequestParam("roomId") int roomId,
+            HttpServletRequest request) {
 
-        User me = getCurrentUser(requset);
+        User me = getCurrentUser(request);
         int myId = me.getUserIdx();
 
-        ChatRoom room = chatService.getOrCreateRoom(myId, otherUserId);
-        return chatService.getHistory(room.getChatRoomIdx())
+        // 3) 메시지 조회
+        List<ChatMessageResponse> msgs = chatService.getHistory(roomId)
                 .stream()
                 .map(ChatMessageResponse::new)
                 .toList();
+
+        // 4) 내 ID 와 메시지 리스트를 함께 반환
+        return new ChatHistoryResponse(myId, msgs);
     }
 
     /**
