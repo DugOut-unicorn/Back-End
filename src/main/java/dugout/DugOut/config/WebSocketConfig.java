@@ -64,11 +64,38 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         if (request instanceof ServletServerHttpRequest servletReq) {
                             HttpServletRequest httpReq = servletReq.getServletRequest();
                             try {
-                                User user = getCurrentUser(httpReq);
-                                // getName()으로 userIdx 문자열을 반환
+                                // STOMP CONNECT 프레임의 헤더에서 토큰 확인
+                                String token = null;
+
+                                // 1. Authorization 헤더 확인
+                                token = httpReq.getHeader("Authorization");
+
+                                // 2. X-Authorization 헤더 확인
+                                if (token == null) {
+                                    token = httpReq.getHeader("X-Authorization");
+                                }
+
+                                // 3. 쿼리 파라미터 확인
+                                if (token == null) {
+                                    token = httpReq.getParameter("token");
+                                }
+
+                                if (token == null || !token.startsWith("Bearer ")) {
+                                    System.out.println("토큰이 없거나 Bearer 형식이 아님: " + token);
+                                    return () -> "anonymous";
+                                }
+
+                                token = token.substring(7);
+                                String email = jwtService.getEmailFromToken(token);
+                                User user = userRepository.findByEmail(email)
+                                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                                System.out.println("WebSocket 인증 성공: " + user.getUserIdx());
                                 return () -> String.valueOf(user.getUserIdx());
+
                             } catch (Exception e) {
-                                // 인증 실패 시 anonymous 처리
+                                System.out.println("WebSocket 인증 실패: " + e.getMessage());
+                                e.printStackTrace();
                                 return () -> "anonymous";
                             }
                         }
