@@ -63,7 +63,6 @@ public class ChatController {
     @MessageMapping("/chat.send")
     public void sendMessage(ChatMessageDto dto) {
         ChatMessage saved = chatService.saveMessage(
-                /*roomId=*/0, // 내부에서 getOrCreateRoom 처리
                 dto.getRoomIdx(),
                 dto.getSenderIdx(),
                 dto.getReceiverIdx(),
