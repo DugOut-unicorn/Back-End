@@ -45,7 +45,7 @@ public class ChatService {
     }
 
     /** 메시지 저장 및 반환 */
-    public ChatMessage saveMessage(int roomId, int sender, int receiver, String content) {
+    public ChatMessage saveMessage(int roomId, int sender, int receiver, Integer receiverIdx, String content) {
         ChatRoom room = getOrCreateRoom(sender, receiver);
         ChatMessage msg = new ChatMessage();
         msg.setChatRoom(room);
