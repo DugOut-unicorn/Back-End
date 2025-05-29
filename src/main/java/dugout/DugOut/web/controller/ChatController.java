@@ -101,10 +101,12 @@ public class ChatController {
      * JWT로 인증된 Principal.getName()을 userId로 사용한다고 가정
      */
     @GetMapping("/rooms")
-    public List<ChatRoomResponse> getMyChatRooms(Principal principal) {
-        int userId = Integer.parseInt(principal.getName());
+    public List<ChatRoomResponse> getMyChatRooms(HttpServletRequest request) {
+        User user = getCurrentUser(request);
+        Integer userId = user.getUserIdx();
         return chatService.getUserChatRooms(userId);
     }
+
 
     @Operation(summary = "매칭 글 채팅방 생성 또는 조회",
             description = "matchingPostId 로 글 작성자와 1:1 채팅방을 생성하거나, 이미 방이 있으면 그 방을 반환합니다.")
