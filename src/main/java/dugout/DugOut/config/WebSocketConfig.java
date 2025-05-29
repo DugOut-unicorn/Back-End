@@ -1,15 +1,13 @@
 package dugout.DugOut.config;
 
+import dugout.DugOut.domain.User;
+import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.config.ChannelRegistration;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -24,9 +22,25 @@ import java.util.Map;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public WebSocketConfig(JwtService jwtService) {
+    public WebSocketConfig(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
+    }
+
+    /**
+     * 기존에 쓰시던 방식 그대로 유지
+     */
+    private User getCurrentUser(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+        token = token.substring(7);
+        String email = jwtService.getEmailFromToken(token);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override
@@ -38,20 +52,23 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat")
+        registry
+                .addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns("*")
+                // Handshake 시점에 Principal 설정
                 .setHandshakeHandler(new DefaultHandshakeHandler() {
                     @Override
                     protected Principal determineUser(ServerHttpRequest request,
                                                       WebSocketHandler wsHandler,
                                                       Map<String, Object> attributes) {
-                        String authHeader = request.getHeaders().getFirst("Authorization");
-                        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                            String token = authHeader.substring(7);
+                        if (request instanceof ServletServerHttpRequest servletReq) {
+                            HttpServletRequest httpReq = servletReq.getServletRequest();
                             try {
-                                String email = jwtService.getEmailFromToken(token);
-                                return () -> email;
+                                User user = getCurrentUser(httpReq);
+                                // getName()으로 userIdx 문자열을 반환
+                                return () -> String.valueOf(user.getUserIdx());
                             } catch (Exception e) {
+                                // 인증 실패 시 anonymous 처리
                                 return () -> "anonymous";
                             }
                         }
@@ -59,29 +76,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     }
                 })
                 .withSockJS();
-    }
-
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                StompHeaderAccessor acc = StompHeaderAccessor.wrap(message);
-                if (StompCommand.CONNECT.equals(acc.getCommand())) {
-                    String authHeader = acc.getFirstNativeHeader("Authorization");
-                    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                        String token = authHeader.substring(7);
-                        try {
-                            String email = jwtService.getEmailFromToken(token);
-                            acc.setUser(() -> email);
-                            System.out.println("▶ WebSocket 연결 성공: " + email);
-                        } catch (Exception e) {
-                            System.out.println("▶ WebSocket 연결 실패: 토큰 검증 오류");
-                        }
-                    }
-                }
-                return message;
-            }
-        });
     }
 }
