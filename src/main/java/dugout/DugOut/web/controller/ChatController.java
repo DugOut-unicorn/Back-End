@@ -86,10 +86,13 @@ public class ChatController {
     @GetMapping("/api/chat/history")
     @ResponseBody
     public List<ChatMessageResponse> history(
-            @RequestParam int userA,
-            @RequestParam int userB) {
+            @RequestParam("otherUserId") int otherUserId,
+            HttpServletRequest requset) {
 
-        ChatRoom room = chatService.getOrCreateRoom(userA, userB);
+        User me = getCurrentUser(requset);
+        int myId = me.getUserIdx();
+
+        ChatRoom room = chatService.getOrCreateRoom(myId, otherUserId);
         return chatService.getHistory(room.getChatRoomIdx())
                 .stream()
                 .map(ChatMessageResponse::new)
