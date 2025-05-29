@@ -16,8 +16,7 @@ public class MatchingPostResponseDto {
     private final String context;
     private final Boolean haveTicket;
     private final LocalDateTime createdAt;
-    private final Integer status;
-    private final Integer isMatched;
+    private final Boolean isMatched;
 
     public MatchingPostResponseDto(MatchingPost matchingPost) {
         this.matchingPostIdx = matchingPost.getMatchingPostIdx();
@@ -29,7 +28,6 @@ public class MatchingPostResponseDto {
         this.context = matchingPost.getContext();
         this.haveTicket = matchingPost.getHaveTicket();
         this.createdAt = matchingPost.getCreatedAt();
-        this.status = matchingPost.getStatus();
         this.isMatched = matchingPost.getIsMatched();
     }
 } 

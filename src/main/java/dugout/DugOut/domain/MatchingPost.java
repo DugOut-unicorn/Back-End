@@ -39,14 +39,10 @@ public class MatchingPost {
 
     @Column(name = "is_matched", nullable = false)
     @Builder.Default
-    private Integer isMatched = 0;
+    private Boolean isMatched = false;
 
     @Column(name = "stadium_idx", nullable = false)
     private Integer stadiumIdx;
-
-    @Column(name = "status", nullable = false)
-    @Builder.Default
-    private Integer status = 0;
 
     @Column(name = "cheering_team_idx")
     private Integer cheeringTeamIdx;
