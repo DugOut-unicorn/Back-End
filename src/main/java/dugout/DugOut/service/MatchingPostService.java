@@ -35,14 +35,14 @@ public class MatchingPostService {
                 .orElseThrow(() -> new EntityNotFoundException("Game not found: " + req.getGameIdx()));
 
         MatchingPost post = MatchingPost.builder()
-                .userIdx(author.getUserIdx())           // user_idx 칼럼 채우기
-                .gameIdx(game.getGameIdx())             // game_idx
-                .stadiumIdx(game.getStadiumIdx())       // stadium_idx (Game 에서 가져오기)
-                .cheeringTeamIdx(author.getCheeringTeamId())         // team_idx (어느 팀 글인지, 필요에 따라)
+                .userIdx(author.getUserIdx())
+                .gameIdx(game.getGameIdx())
+                .stadiumIdx(game.getStadiumIdx())
+                .cheeringTeamIdx(author.getCheeringTeamId())
                 .title(req.getTitle())                  // title
                 .context(req.getContext())              // context
                 .haveTicket(req.getHaveTicket())        // have_ticket
-                .preferredMatchDate(LocalDate.from(game.getDate()))      // preferred_match_date
+                .preferredMatchDate(LocalDate.from(game.getDate()))
                 .build();
 
         // ③ 저장 후 ID 리턴

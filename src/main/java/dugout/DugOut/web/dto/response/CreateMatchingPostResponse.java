@@ -1,5 +1,9 @@
 package dugout.DugOut.web.dto.response;
 
+
+import lombok.Getter;
+
+@Getter
 public class CreateMatchingPostResponse {
     private final Long postIdx;
     private final String message;

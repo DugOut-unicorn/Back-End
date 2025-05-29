@@ -19,19 +19,18 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "messageIdx")
     private Integer messageIdx;
-    
-    @Column(name = "chatRoomIdx2", nullable = false)
-    private Integer chatRoomIdx2;
-    
-    @Column(name = "userIdx", nullable = false)
-    private Integer userIdx;
-    
-    @Column(name = "chatRoomIdx", nullable = false)
-    private Integer chatRoomIdx;
-    
+
+    @Column(name = "receiverIdx", nullable = false)
+    private Integer receiverIdx;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_room_idx", nullable = false)
+    private ChatRoom chatRoom;
+
     @Column(name = "senderIdx", nullable = false)
     private Integer senderIdx;
-    
+
+    @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
     
