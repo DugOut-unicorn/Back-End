@@ -61,7 +61,7 @@ public class CalendarService {
                             cheeringTeamIdx.equals(g.getHomeTeamIdx()) ||
                                     cheeringTeamIdx.equals(g.getAwayTeamIdx())
                     )
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         // 4) 팀 이름 매핑
