@@ -3,13 +3,17 @@ package dugout.DugOut.service;
 import dugout.DugOut.domain.Game;
 import dugout.DugOut.domain.MatchingPost;
 import dugout.DugOut.domain.User;
+import dugout.DugOut.dto.MatchingPostResponseDto;
 import dugout.DugOut.repository.GameRepository;
 import dugout.DugOut.repository.MatchingPostRepository;
 import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.web.dto.request.CreateMatchingPostRequest;
+import dugout.DugOut.web.dto.response.MatchingPostDetailResponse;
+import dugout.DugOut.web.dto.response.MatchingPostListByGameResponse;
 import dugout.DugOut.web.dto.response.MatchingPostResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,10 +23,12 @@ import java.util.List;
 public class MatchingPostService {
     private final MatchingPostRepository matchingPostRepository;
     private final GameRepository gameRepository;
+    private final UserRepository userRepository;
 
-    public MatchingPostService(MatchingPostRepository matchingPostRepository, GameRepository gameRepository) {
+    public MatchingPostService(MatchingPostRepository matchingPostRepository, GameRepository gameRepository, UserRepository userRepository) {
         this.matchingPostRepository = matchingPostRepository;
         this.gameRepository = gameRepository;
+        this.userRepository = userRepository;
     }
 
     public List<MatchingPostResponse> getRecentPosts() {
@@ -48,5 +54,32 @@ public class MatchingPostService {
         // ③ 저장 후 ID 리턴
         matchingPostRepository.save(post);
         return post.getMatchingPostIdx();
+    }
+
+    public List<MatchingPostListByGameResponse> getPostsByGame(int gameIdx, Pageable pageable) {
+        return matchingPostRepository.findByGameIdx(gameIdx, pageable)
+                .stream()
+                .map(p -> new MatchingPostListByGameResponse(
+                        p.getMatchingPostIdx(),
+                        p.getTitle(),
+                        p.getContext(),
+                        p.getHaveTicket(),
+                        p.getIsMatched(),
+                        p.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    /**
+     * 매칭글 상세 조회
+     */
+    public MatchingPostDetailResponse getPostDetail(Long postIdx) {
+        MatchingPost post = matchingPostRepository.findById(postIdx.intValue())
+                .orElseThrow(() -> new EntityNotFoundException("MatchingPost not found: " + postIdx));
+
+        User author = userRepository.findById(post.getUserIdx())
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + post.getUserIdx()));
+
+        return new MatchingPostDetailResponse(post, author.getNickname());
     }
 }
