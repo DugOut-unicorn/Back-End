@@ -45,14 +45,14 @@ public class ChatService {
     }
 
     /** 메시지 저장 및 반환 */
-    public ChatMessage saveMessage(int roomId, int sender, int receiver, Integer receiverIdx, String content) {
-        ChatRoom room = getOrCreateRoom(sender, receiver);
+    public ChatMessage saveMessage(int roomId, int senderIdx, int receiverIdx, String content) {
+        ChatRoom room = roomRepo.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("Chat room not found"));
         ChatMessage msg = new ChatMessage();
         msg.setChatRoom(room);
-        msg.setSenderIdx(sender);
-        msg.setReceiverIdx(receiver);
+        msg.setSenderIdx(senderIdx);
+        msg.setReceiverIdx(receiverIdx);
         msg.setContent(content);
-        msg.setSentAt(LocalDateTime.now());
         return msgRepo.save(msg);
     }
 
@@ -82,7 +82,8 @@ public class ChatService {
                             peerId,
                             peer.getNickname(),
                             peer.getProfileImageUrl(),
-                            room.getCreatedAt()
+                            room.getCreatedAt(),
+                            room.getMatchingPostIdx()
                     );
                 })
                 .collect(Collectors.toList());
@@ -109,7 +110,6 @@ public class ChatService {
             ChatRoom r = new ChatRoom();
             r.setUser1Idx(currentUserId.intValue());
             r.setUser2Idx(authorId);
-            // **여기 반드시 matchingPostIdx를 채워 줍니다**
             r.setMatchingPostIdx(matchingPostId);
             return roomRepo.save(r);
         });
