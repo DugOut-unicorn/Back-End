@@ -2,9 +2,11 @@ package dugout.DugOut.service;
 
 import dugout.DugOut.domain.ChatMessage;
 import dugout.DugOut.domain.ChatRoom;
+import dugout.DugOut.domain.User;
 import dugout.DugOut.repository.ChatMessageRepository;
 import dugout.DugOut.repository.ChatRoomRepository;
 import dugout.DugOut.repository.MatchingPostRepository;
+import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.web.dto.response.ChatRoomResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,11 +22,13 @@ public class ChatService {
     private final ChatRoomRepository roomRepo;
     private final ChatMessageRepository msgRepo;
     private final MatchingPostRepository postRepo;
+    private final UserRepository userRepo;
 
-    public ChatService(ChatRoomRepository roomRepo, ChatMessageRepository msgRepo, MatchingPostRepository postRepo) {
+    public ChatService(ChatRoomRepository roomRepo, ChatMessageRepository msgRepo, MatchingPostRepository postRepo, UserRepository userRepo) {
         this.roomRepo = roomRepo;
         this.msgRepo = msgRepo;
         this.postRepo = postRepo;
+        this.userRepo = userRepo;
     }
 
     /** 1:1 채팅방 조회 혹은 생성 */
@@ -69,9 +73,15 @@ public class ChatService {
                     int peerId = room.getUser1Idx().equals(userId)
                             ? room.getUser2Idx()
                             : room.getUser1Idx();
+
+                    User peer = userRepo.findById(peerId)
+                            .orElseThrow(() -> new EntityNotFoundException("Peer user not found"));
+
                     return new ChatRoomResponse(
                             room.getChatRoomIdx(),
                             peerId,
+                            peer.getNickname(),
+                            peer.getProfileImageUrl(),
                             room.getCreatedAt()
                     );
                 })
