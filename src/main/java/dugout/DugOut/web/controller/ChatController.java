@@ -60,28 +60,7 @@ public class ChatController {
 //    }
 
 
-    @MessageMapping("/chat.send")
-    public void sendMessage(ChatMessageDto dto) {
-        ChatMessage saved = chatService.saveMessage(
-                dto.getRoomIdx(),
-                dto.getSenderIdx(),
-                dto.getReceiverIdx(),
-                dto.getContent()
-        );
-        ChatMessageResponse resp = new ChatMessageResponse(saved);
-        // 1:1 대화 상대에게 보냄
-        template.convertAndSendToUser(
-                dto.getReceiverIdx().toString(),
-                "/queue/messages",
-                resp
-        );
-        // 본인에게도 에코(선택)
-        template.convertAndSendToUser(
-                dto.getSenderIdx().toString(),
-                "/queue/messages",
-                resp
-        );
-    }
+
 
     // 과거 메시지 조회 REST API
     @GetMapping("/history")
