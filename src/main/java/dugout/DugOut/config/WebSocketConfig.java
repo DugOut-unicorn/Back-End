@@ -15,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -22,12 +23,10 @@ import java.util.Map;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     public WebSocketConfig(JwtService jwtService,
                            UserRepository userRepository) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
     }
 
     @Override
@@ -45,21 +44,26 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     @Override
                     protected Principal determineUser(ServerHttpRequest request,
                                                       WebSocketHandler wsHandler,
-                                                      Map<String, Object> attributes) {
-                        String tokenParam = UriComponentsBuilder
-                                .fromUri(request.getURI())
-                                .build()
-                                .getQueryParams()
-                                .getFirst("token");
+                                                      Map<String,Object> attrs) {
+                        // ① URL 쿼리 우선
+                        List<String> params = UriComponentsBuilder.fromUri(request.getURI())
+                                .build().getQueryParams()
+                                .get("token");
+                        String raw = params != null && !params.isEmpty()
+                                ? params.get(0)
+                                : request.getHeaders().getFirst("Authorization");
 
-                        if (tokenParam != null && tokenParam.startsWith("Bearer ")) {
-                            String jwt = tokenParam.substring(7);
-                            // DB 조회 없이, 토큰에서 바로 userIdx 파싱
+                        if (raw != null) {
+                            // "Bearer " 가 붙었든 안 붙었든 strip
+                            String jwt = raw.startsWith("Bearer ")
+                                    ? raw.substring(7)
+                                    : raw;
                             Integer userId = jwtService.getUserIdFromToken(jwt);
-                            return () -> userId.toString();
+                            return userId::toString;
                         }
                         return () -> "anonymous";
                     }
+
                 })
 
                 .withSockJS();
