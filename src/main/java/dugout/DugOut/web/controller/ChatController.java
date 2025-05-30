@@ -3,7 +3,6 @@ package dugout.DugOut.web.controller;
 import dugout.DugOut.domain.ChatMessage;
 import dugout.DugOut.domain.ChatRoom;
 import dugout.DugOut.domain.User;
-import dugout.DugOut.dto.ChatTestDto;
 import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.ChatService;
 import dugout.DugOut.service.JwtService;
@@ -60,41 +59,29 @@ public class ChatController {
 //        System.out.println("▶ convertAndSendToUser for: " + msg.getTo());
 //    }
 
+
     @MessageMapping("/chat.send")
     public void sendMessage(ChatMessageDto dto) {
-        // 1) 메시지 저장 (여기서 ChatRoom과 함께 저장된 채팅메시지를 반환)
         ChatMessage saved = chatService.saveMessage(
                 dto.getRoomIdx(),
                 dto.getSenderIdx(),
-                dto.getReceiverIdx(),  // 이 파라미터는 DB 저장용으로만 쓰이고,
+                dto.getReceiverIdx(),
                 dto.getContent()
         );
-
-        // 2) 실제 “상대(peer)” ID 계산
-        ChatRoom room = saved.getChatRoom();
-        int senderId = dto.getSenderIdx();
-        int peerId = room.getUser1Idx().equals(senderId)
-                ? room.getUser2Idx()
-                : room.getUser1Idx();
-
-        // 3) 응답 DTO 생성
         ChatMessageResponse resp = new ChatMessageResponse(saved);
-
-        // 4) 상대방에게만 전송
+        // 1:1 대화 상대에게 보냄
         template.convertAndSendToUser(
-                String.valueOf(peerId),
+                dto.getReceiverIdx().toString(),
                 "/queue/messages",
                 resp
         );
-        // 5) (선택) 본인에게도 에코
+        // 본인에게도 에코(선택)
         template.convertAndSendToUser(
-                String.valueOf(senderId),
+                dto.getSenderIdx().toString(),
                 "/queue/messages",
                 resp
         );
     }
-
-
 
     // 과거 메시지 조회 REST API
     @GetMapping("/history")
