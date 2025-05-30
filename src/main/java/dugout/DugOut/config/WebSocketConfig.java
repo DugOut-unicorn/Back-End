@@ -30,16 +30,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtService jwtService;
 
-    public WebSocketConfig(JwtService jwtService,
-                           UserRepository userRepository) {
+    public WebSocketConfig(JwtService jwtService) {
         this.jwtService = jwtService;
-    }
-
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/queue");
-        registry.setUserDestinationPrefix("/user");
-        registry.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
@@ -50,52 +42,33 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     @Override
                     protected Principal determineUser(ServerHttpRequest request,
                                                       WebSocketHandler wsHandler,
-                                                      Map<String,Object> attrs) {
-                        // ① URL 쿼리 우선
-                        List<String> params = UriComponentsBuilder.fromUri(request.getURI())
-                                .build().getQueryParams()
-                                .get("token");
-                        String raw = params != null && !params.isEmpty()
-                                ? params.get(0)
-                                : request.getHeaders().getFirst("Authorization");
-
+                                                      Map<String, Object> attributes) {
+                        // ① URL 쿼리 또는 헤더에서 토큰 꺼내기
+                        String raw = UriComponentsBuilder.fromUri(request.getURI())
+                                .build().getQueryParams().getFirst("token");
+                        if (raw == null) {
+                            raw = request.getHeaders().getFirst("Authorization");
+                        }
                         if (raw != null) {
-                            // "Bearer " 가 붙었든 안 붙었든 strip
                             String jwt = raw.startsWith("Bearer ")
                                     ? raw.substring(7)
                                     : raw;
-                            Integer userId = jwtService.getUserIdFromToken(jwt);
-                            return userId::toString;
+                            // ② 토큰에서 email(subject) 추출
+                            String email = jwtService.getEmailFromToken(jwt);
+                            // ③ Principal.name 으로 email 사용
+                            return () -> email;
                         }
                         return () -> "anonymous";
                     }
-
                 })
-
                 .withSockJS();
     }
 
     @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-                // 클라이언트가 CONNECT 프레임 보낼 때
-                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    // STOMP CONNECT 헤더에서 Authorization 꺼내기
-                    String authHeader = accessor.getFirstNativeHeader("Authorization");
-                    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                        String rawJwt = authHeader.substring(7);
-                        Integer userId = jwtService.getUserIdFromToken(rawJwt);
-                        // Principal 을 userId 로 설정
-                        accessor.setUser(() -> userId.toString());
-                        System.out.println("▶ CONNECT interceptor set Principal=" + userId);
-                    }
-                }
-                return message;
-            }
-        });
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/queue");
+        registry.setUserDestinationPrefix("/user");
+        registry.setApplicationDestinationPrefixes("/app");
     }
 
 }

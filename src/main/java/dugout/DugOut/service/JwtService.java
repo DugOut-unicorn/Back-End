@@ -48,16 +48,6 @@ public class JwtService {
         return claims.getSubject();
     }
 
-    public Integer getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        // 토큰 생성 시에 넣어둔 userIdx 클레임
-        return claims.get("userIdx", Integer.class);
-    }
-
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
