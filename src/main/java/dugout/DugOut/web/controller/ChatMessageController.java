@@ -1,6 +1,7 @@
 package dugout.DugOut.web.controller;
 
 import dugout.DugOut.domain.ChatMessage;
+import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.ChatService;
 import dugout.DugOut.web.dto.ChatMessageDto;
 import dugout.DugOut.web.dto.response.ChatMessageResponse;
@@ -13,10 +14,12 @@ public class ChatMessageController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate template;
+    private final UserRepository userRepository;
 
-    public ChatMessageController(ChatService chatService, SimpMessagingTemplate template) {
+    public ChatMessageController(ChatService chatService, SimpMessagingTemplate template, UserRepository userRepository) {
         this.chatService = chatService;
         this.template = template;
+        this.userRepository = userRepository;
     }
 
     @MessageMapping("/chat.send")
@@ -28,18 +31,19 @@ public class ChatMessageController {
                 dto.getContent()
         );
         ChatMessageResponse resp = new ChatMessageResponse(saved);
-        // 1:1 대화 상대에게 보냄
+
+        // 2) 받는 사람 email 조회
+        String receiverEmail = userRepository.findById(dto.getReceiverIdx())
+                .orElseThrow().getEmail();
+        // 3) 보내는 사람 email 조회 (에코)
+        String senderEmail   = userRepository.findById(dto.getSenderIdx())
+                .orElseThrow().getEmail();
+
+        // 4) STOMP 브로커에 email 기반으로 발행
         template.convertAndSendToUser(
-                dto.getReceiverIdx().toString(),
+                receiverEmail,   // Principal.name 에 매핑되는 email
                 "/queue/messages",
                 resp
         );
-
-        System.out.println("▶ SEND to user=" + dto.getReceiverIdx());
-
-        System.out.println("▶ [STOMP] sendMessage() 진입: room=" + dto.getRoomIdx()
-                + ", from=" + dto.getSenderIdx() + ", to=" + dto.getReceiverIdx()
-                + ", content=" + dto.getContent());
-        System.out.println("▶ [DB] saveMessage 리턴: messageIdx=" + saved.getMessageIdx());
     }
 }
