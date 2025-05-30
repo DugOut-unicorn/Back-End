@@ -34,6 +34,9 @@ public class ChatMessageController {
                 "/queue/messages",
                 resp
         );
+
+        System.out.println("▶ SEND to user=" + dto.getReceiverIdx());
+
         // 본인에게도 에코(선택)
         template.convertAndSendToUser(
                 dto.getSenderIdx().toString(),
