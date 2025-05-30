@@ -7,7 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -41,46 +48,59 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry
                 .addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns("*")
-                // Handshake 시점에 Principal 설정
+                // 오직 JWT 헤더만 사용하도록 HandshakeHandler 설정
                 .setHandshakeHandler(new DefaultHandshakeHandler() {
                     @Override
                     protected Principal determineUser(ServerHttpRequest request,
                                                       WebSocketHandler wsHandler,
                                                       Map<String, Object> attributes) {
+                        if (!(request instanceof ServletServerHttpRequest servletReq)) {
+                            throw new RuntimeException("Unsupported handshake request");
+                        }
+                        HttpServletRequest httpReq = servletReq.getServletRequest();
 
-                        if (request instanceof ServletServerHttpRequest servletReq) {
-                            HttpServletRequest httpReq = servletReq.getServletRequest();
-
-                            // 1) JWT 토큰 파싱 (기존 로직)
-                            String token = httpReq.getHeader("Authorization");
-                            if (token == null) {
-                                token = httpReq.getHeader("X-Authorization");
-                            }
-                            if (token != null && token.startsWith("Bearer ")) {
-                                try {
-                                    String email = jwtService.getEmailFromToken(token.substring(7));
-                                    User user = userRepository.findByEmail(email)
-                                            .orElseThrow();
-                                    System.out.println("WebSocket 인증 성공: userId=" + user.getUserIdx());
-                                    return () -> String.valueOf(user.getUserIdx());
-                                } catch (Exception e) {
-                                    System.out.println("WebSocket 인증 실패: " + e.getMessage());
-                                }
-                            }
-
-                            // 2) JWT 없으면 쿼리 파라미터 'user' 로 식별
-                            String userParam = httpReq.getParameter("user");
-                            if (userParam != null && !userParam.isBlank()) {
-                                System.out.println("WebSocket handshake user-param: " + userParam);
-                                return () -> userParam;
-                            }
+                        // 1) Authorization 또는 X-Authorization 헤더에서 Bearer 토큰 추출
+                        String header = httpReq.getHeader("Authorization");
+                        if (header == null) {
+                            header = httpReq.getHeader("X-Authorization");
+                        }
+                        if (header == null || !header.startsWith("Bearer ")) {
+                            throw new RuntimeException("유효하지 않은 토큰입니다.");
                         }
 
-                        // 그 외엔 anonymous
-                        return () -> "anonymous";
-                    }
+                        String jwt = header.substring(7);
+                        // 2) JWT 검증 및 사용자 조회
+                        String email = jwtService.getEmailFromToken(jwt);
+                        User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
+                        System.out.println("WebSocket 인증 성공: userId=" + user.getUserIdx());
+                        // 3) Principal.getName() 으로 userId 를 반환
+                        return () -> String.valueOf(user.getUserIdx());
+                    }
                 })
                 .withSockJS();
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(new ChannelInterceptor() {
+            @Override
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                StompHeaderAccessor accessor =
+                        MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    String token = accessor.getFirstNativeHeader("Authorization");
+                    if (token != null && token.startsWith("Bearer ")) {
+                        String email = jwtService.getEmailFromToken(token.substring(7));
+                        User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+                        // 여기가 바로 STOMP 세션의 Principal 설정 지점
+                        accessor.setUser(() -> String.valueOf(user.getUserIdx()));
+                    }
+                }
+                return message;
+            }
+        });
     }
 }
