@@ -46,26 +46,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     protected Principal determineUser(ServerHttpRequest request,
                                                       WebSocketHandler wsHandler,
                                                       Map<String, Object> attributes) {
-                        // 1) URI 쿼리 파라미터에서 token=Bearer ... 꺼내기
-                        MultiValueMap<String, String> params =
-                                UriComponentsBuilder.fromUri(request.getURI())
-                                        .build()
-                                        .getQueryParams();
-                        String tokenParam = params.getFirst("token");
+                        String tokenParam = UriComponentsBuilder
+                                .fromUri(request.getURI())
+                                .build()
+                                .getQueryParams()
+                                .getFirst("token");
 
                         if (tokenParam != null && tokenParam.startsWith("Bearer ")) {
                             String jwt = tokenParam.substring(7);
-                            // 2) 이메일 파싱
-                            String email = jwtService.getEmailFromToken(jwt);
-                            // 3) DB 조회해서 userIdx 얻기
-                            User user = userRepository.findByEmail(email)
-                                    .orElseThrow(() -> new RuntimeException("User not found"));
-                            // 4) userIdx.toString() 을 Principal.name 으로 사용
-                            return () -> user.getUserIdx().toString();
+                            // DB 조회 없이, 토큰에서 바로 userIdx 파싱
+                            Integer userId = jwtService.getUserIdFromToken(jwt);
+                            return () -> userId.toString();
                         }
                         return () -> "anonymous";
                     }
                 })
+
                 .withSockJS();
     }
 

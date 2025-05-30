@@ -60,8 +60,6 @@ public class ChatController {
 //    }
 
 
-
-
     // 과거 메시지 조회 REST API
     @GetMapping("/history")
     @ResponseBody
