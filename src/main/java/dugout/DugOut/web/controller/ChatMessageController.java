@@ -40,5 +40,10 @@ public class ChatMessageController {
                 "/queue/messages",
                 resp
         );
+
+        System.out.println("▶ [STOMP] sendMessage() 진입: room=" + dto.getRoomIdx()
+                + ", from=" + dto.getSenderIdx() + ", to=" + dto.getReceiverIdx()
+                + ", content=" + dto.getContent());
+        System.out.println("▶ [DB] saveMessage 리턴: messageIdx=" + saved.getMessageIdx());
     }
 }
