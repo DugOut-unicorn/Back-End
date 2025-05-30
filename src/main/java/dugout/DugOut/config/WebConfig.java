@@ -37,4 +37,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true)  // 쿠키, 인증 헤더 등을 포함한 요청 허용
                 .maxAge(3600);  // preflight 요청 결과를 캐시하는 시간 (초)
     }
-} 
+}
