@@ -347,19 +347,4 @@ public class LoginController {
         }
     }
 
-//    @GetMapping("/nickname")
-//    public ResponseEntity<ApiResponse<Map<String, Object>>> getNickname(HttpServletRequest request) {
-//        try {
-//            User user = getUserFromToken(request);
-//
-//            Map<String, Object> response = new HashMap<>();
-//            response.put("nickname", user.getNickname());
-//            response.put("cheeringTeamId", user.getCheeringTeamId());
-//
-//            return ResponseEntity.ok(ApiResponse.success("사용자 정보를 성공적으로 조회했습니다.", response));
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.badRequest()
-//                    .body(ApiResponse.error(e.getMessage()));
-//        }
-//    }
 }
