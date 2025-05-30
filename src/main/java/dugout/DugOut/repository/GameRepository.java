@@ -46,23 +46,6 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
         WHERE function('DATE', g.date) = :date 
     """)
     List<Game> findGamesByDate(@Param("date") LocalDate date);
-
-
-
-    // --- 특정 날짜·홈팀·어웨이팀에 매핑된 단일 경기 조회
-    @Query("""
-        SELECT g
-          FROM Game g
-         WHERE function('DATE', g.date)    = :date
-           AND g.homeTeamIdx               = :homeTeamIdx
-           AND g.awayTeamIdx               = :awayTeamIdx
-    """)
-    Optional<Game> findByDateAndHomeTeamIdxAndAwayTeamIdx(
-            @Param("date")          LocalDate date,
-            @Param("homeTeamIdx")   Integer homeTeamIdx,
-            @Param("awayTeamIdx")   Integer awayTeamIdx
-    );
-
 };
 
 
