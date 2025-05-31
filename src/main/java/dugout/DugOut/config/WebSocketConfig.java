@@ -16,6 +16,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.security.Principal;
 import java.util.List;
@@ -78,7 +79,30 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns("*")
+                .setHandshakeHandler(new DefaultHandshakeHandler() {
+                    @Override
+                    protected Principal determineUser(ServerHttpRequest request,
+                                                      WebSocketHandler wsHandler,
+                                                      Map<String, Object> attributes) {
+                        // ① 쿼리 파라미터에서 토큰 가져오기
+                        String token = UriComponentsBuilder
+                                .fromUri(request.getURI())
+                                .build()
+                                .getQueryParams()
+                                .getFirst("token");
+                        if (token != null) {
+                            try {
+                                String email = jwtService.getEmailFromToken(token);
+                                return () -> email;   // Principal.name = email
+                            } catch (Exception e) {
+                                System.out.println("[Handshake] 토큰 파싱 실패: " + e.getMessage());
+                            }
+                        }
+                        return () -> "anonymous";
+                    }
+                })
                 .withSockJS();
+
     }
 
     @Override
@@ -89,43 +113,43 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setApplicationDestinationPrefixes("/app");
     }
 
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                StompHeaderAccessor accessor =
-                        MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
-                if (accessor != null) {
-                    // ① STOMP CONNECT 프레임일 때 토큰 파싱
-                    if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                        // STOMP 헤더의 "Authorization" (Native Header) 가져오기
-                        List<String> authHeaders = accessor.getNativeHeader("Authorization");
-                        if (authHeaders != null && !authHeaders.isEmpty()) {
-                            String rawToken = authHeaders.get(0); // "Bearer <토큰>"
-                            if (rawToken.startsWith("Bearer ")) {
-                                String jwt = rawToken.substring(7);
-                                try {
-                                    String email = jwtService.getEmailFromToken(jwt);
-                                    // Principal 객체를 만들어서 세션에 붙여 줌
-                                    Principal user = () -> email;
-                                    accessor.setUser(user);
-                                    System.out.println("[STOMP CONNECT] 인증 성공, email=" + email);
-                                } catch (Exception e) {
-                                    System.out.println("[STOMP CONNECT] 인증 실패: " + e.getMessage());
-                                    // 인증 실패 시, 연결 자체를 차단하려면 null 반환
-                                    return null;
-                                }
-                            }
-                        } else {
-                            System.out.println("[STOMP CONNECT] Authorization 헤더가 없음");
-                            return null;  // 헤더 없으면 연결 거부
-                        }
-                    }
-                }
-                return message;
-            }
-        });
-    }
+//    @Override
+//    public void configureClientInboundChannel(ChannelRegistration registration) {
+//        registration.interceptors(new ChannelInterceptor() {
+//            @Override
+//            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+//                StompHeaderAccessor accessor =
+//                        MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+//
+//                if (accessor != null) {
+//                    // ① STOMP CONNECT 프레임일 때 토큰 파싱
+//                    if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+//                        // STOMP 헤더의 "Authorization" (Native Header) 가져오기
+//                        List<String> authHeaders = accessor.getNativeHeader("Authorization");
+//                        if (authHeaders != null && !authHeaders.isEmpty()) {
+//                            String rawToken = authHeaders.get(0); // "Bearer <토큰>"
+//                            if (rawToken.startsWith("Bearer ")) {
+//                                String jwt = rawToken.substring(7);
+//                                try {
+//                                    String email = jwtService.getEmailFromToken(jwt);
+//                                    // Principal 객체를 만들어서 세션에 붙여 줌
+//                                    Principal user = () -> email;
+//                                    accessor.setUser(user);
+//                                    System.out.println("[STOMP CONNECT] 인증 성공, email=" + email);
+//                                } catch (Exception e) {
+//                                    System.out.println("[STOMP CONNECT] 인증 실패: " + e.getMessage());
+//                                    // 인증 실패 시, 연결 자체를 차단하려면 null 반환
+//                                    return null;
+//                                }
+//                            }
+//                        } else {
+//                            System.out.println("[STOMP CONNECT] Authorization 헤더가 없음");
+//                            return null;  // 헤더 없으면 연결 거부
+//                        }
+//                    }
+//                }
+//                return message;
+//            }
+//        });
+//    }
 }
