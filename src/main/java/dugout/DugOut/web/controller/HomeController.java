@@ -1,18 +1,19 @@
 package dugout.DugOut.web.controller;
 
 import dugout.DugOut.domain.Game;
+import dugout.DugOut.domain.User;
+import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.*;
 import dugout.DugOut.web.dto.StadiumWeatherDto;
 import dugout.DugOut.web.dto.response.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -36,25 +37,28 @@ public class HomeController {
     private final MatchingPostService matchingPostService;
     private final GameResultService gameResultService;
     private final WeatherService weatherService;
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    //로그인 한 유저의 응원 팀 반환
-    @GetMapping("/users/cheering-team")
-    public ResponseEntity<CheeringTeamResponse> getMyCheeringTeam(
-            @RequestParam("userIdx") Integer userIdx
-    ) {
-        Integer cheeringTeamId = userService.getCheeringTeamId(userIdx);
-        return ResponseEntity.ok(new CheeringTeamResponse(cheeringTeamId));
+
+    private User getCurrentUser(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        String email = jwtService.getEmailFromToken(token);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-//    //최신 뉴스 크롤링 후 반환
-//    @GetMapping("/news-fetch")
-//    public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn() throws IOException {
-//        // 오늘 날짜 ISO 포맷 (yyyy-MM-dd)
-//        String todayIso = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-//        // Selenium 으로 바로 스크래핑한 결과
-//        List<NewsResponse> latest = newsFetchService.scrapeWithSelenium(todayIso);
-//        return ResponseEntity.ok(latest);
-//    }
+    //로그인 한 유저의 응원 팀 반환
+    @GetMapping("/entry-banner")
+    public ResponseEntity<EntryBannerResponse> getEntryBannerInfo(
+            HttpServletRequest request
+    ) {
+        User user = getCurrentUser(request);
+        Integer userIdx = user.getUserIdx();
+        Integer cheeringTeamId = userService.getCheeringTeamId(userIdx);
+        String nickname = user.getNickname();
+        return ResponseEntity.ok(new EntryBannerResponse(cheeringTeamId,nickname));
+    }
 
     @GetMapping("/news-fetch")
     public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn(
@@ -81,15 +85,6 @@ public class HomeController {
         List<Game> ongoing = gameService.getOngoingGames(date, now);
         return ResponseEntity.ok(ongoing);
     }
-
-//    /**
-//     * 오늘 일정된 경기 목록 조회
-//     * GET /api/games/today
-//     */
-//    @GetMapping("/today-games")
-//    public List<TodayGameListResponse> getTodayGames() {
-//        return gameService.getTodayGames();
-//    }
 
     // 최신 5개 매칭글 반환
     @GetMapping("/recent-matching-posts")

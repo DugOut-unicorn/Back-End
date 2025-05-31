@@ -100,8 +100,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // Simple Broker 활성화 (/queue), 스프링 애플리케이션 뿌리는 prefix (/app)
-        registry.enableSimpleBroker("/queue")
-                .setHeartbeatValue(new long[]{4000, 4000});
+        registry.enableSimpleBroker("/queue");
         registry.setUserDestinationPrefix("/user");
         registry.setApplicationDestinationPrefixes("/app");
     }
