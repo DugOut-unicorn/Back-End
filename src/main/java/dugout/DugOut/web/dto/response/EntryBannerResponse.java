@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CheeringTeamResponse {
+public class EntryBannerResponse {
     private final Integer cheeringTeamId;
+    private final String nickname;
 }
