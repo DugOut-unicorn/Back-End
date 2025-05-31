@@ -50,5 +50,12 @@ public class ChatMessageController {
                 "/queue/messages",
                 resp
         );
+
+        // 5) 에코: 송신자에게도 동일한 메시지 발행
+        template.convertAndSendToUser(
+                senderEmail,          // Principal.name 에 매핑된 보내는 사람 이메일
+                "/queue/messages",    // 보내는 사람 클라이언트가 subscribe 하는 경로
+                resp                  // 동일한 ChatMessageResponse
+        );
     }
 }
