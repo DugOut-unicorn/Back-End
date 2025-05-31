@@ -24,6 +24,11 @@ public class ChatMessageController {
 
     @MessageMapping("/chat.send")
     public void sendMessage(ChatMessageDto dto) {
+        System.out.println("▶ sendMessage 호출, roomIdx=" + dto.getRoomIdx() +
+                ", senderIdx=" + dto.getSenderIdx() +
+                ", receiverIdx=" + dto.getReceiverIdx() +
+                ", content=" + dto.getContent());
+
         ChatMessage saved = chatService.saveMessage(
                 dto.getRoomIdx(),
                 dto.getSenderIdx(),

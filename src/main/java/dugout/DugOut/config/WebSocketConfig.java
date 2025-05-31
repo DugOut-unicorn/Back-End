@@ -44,19 +44,32 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                                       WebSocketHandler wsHandler,
                                                       Map<String, Object> attributes) {
                         // ① URL 쿼리 또는 헤더에서 토큰 꺼내기
-                        String raw = UriComponentsBuilder.fromUri(request.getURI())
-                                .build().getQueryParams().getFirst("token");
-                        if (raw == null) {
-                            raw = request.getHeaders().getFirst("Authorization");
-                        }
-                        if (raw != null) {
-                            String jwt = raw.startsWith("Bearer ")
-                                    ? raw.substring(7)
-                                    : raw;
-                            // ② 토큰에서 email(subject) 추출
-                            String email = jwtService.getEmailFromToken(jwt);
-                            // ③ Principal.name 으로 email 사용
-                            return () -> email;
+//                        String raw = UriComponentsBuilder.fromUri(request.getURI())
+//                                .build().getQueryParams().getFirst("token");
+//                        if (raw == null) {
+//                            raw = request.getHeaders().getFirst("Authorization");
+//                        }
+//                        if (raw != null) {
+//                            String jwt = raw.startsWith("Bearer ")
+//                                    ? raw.substring(7)
+//                                    : raw;
+//                            // ② 토큰에서 email(subject) 추출
+//                            String email = jwtService.getEmailFromToken(jwt);
+//                            // ③ Principal.name 으로 email 사용
+//                            return () -> email;
+//                        }
+//                        return () -> "anonymous";
+                        // ① 헤더에서 토큰 꺼내기
+                        String raw = request.getHeaders().getFirst("Authorization");
+                        if (raw != null && raw.startsWith("Bearer ")) {
+                            String jwt = raw.substring(7);
+                            try {
+                                String email = jwtService.getEmailFromToken(jwt);
+                                return () -> email;
+                            } catch (Exception e) {
+                                // 토큰 파싱 실패 시 로그 남기고
+                                System.out.println("[Handshake] 잘못된 토큰: " + e.getMessage());
+                            }
                         }
                         return () -> "anonymous";
                     }
