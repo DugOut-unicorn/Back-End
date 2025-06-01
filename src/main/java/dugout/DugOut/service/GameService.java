@@ -22,6 +22,11 @@ public class GameService {
 
     }
 
+    public Game getGameById(int gameIdx) {
+        return gameRepository.findById((int) gameIdx)
+                .orElseThrow(() -> new IllegalArgumentException("게임을 찾을 수 없음: " + gameIdx));
+    }
+
     /**
      * 지정된 날짜(day)와 현재 시각(now) 기준으로
      * 이미 시작했거나 아직 종료되지 않은(<= now) '진행 중'인 경기만 조회

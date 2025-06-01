@@ -17,18 +17,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class MatchingPostService {
     private final MatchingPostRepository matchingPostRepository;
-    private final GameRepository gameRepository;
     private final UserRepository userRepository;
+    private final GameService gameService;
 
-    public MatchingPostService(MatchingPostRepository matchingPostRepository, GameRepository gameRepository, UserRepository userRepository) {
+    public MatchingPostService(MatchingPostRepository matchingPostRepository, UserRepository userRepository, GameService gameService) {
         this.matchingPostRepository = matchingPostRepository;
-        this.gameRepository = gameRepository;
         this.userRepository = userRepository;
+        this.gameService = gameService;
     }
 
     public List<MatchingPostResponse> getRecentPosts() {
@@ -36,24 +37,38 @@ public class MatchingPostService {
         return matchingPostRepository.findTop5WithValidUser(PageRequest.of(0, 10));
     }
 
-    public Long create(CreateMatchingPostRequest req, User author) {
-        Game game = gameRepository.findById(req.getGameIdx())
-                .orElseThrow(() -> new EntityNotFoundException("Game not found: " + req.getGameIdx()));
+    public Long create(CreateMatchingPostRequest req, User user) {
+        // 1) gameIdx로 Game 엔티티 조회
+        Game game = gameService.getGameById(req.getGameIdx());
+        if (game == null) {
+            throw new IllegalArgumentException("해당 gameIdx의 경기를 찾을 수 없습니다: " + req.getGameIdx());
+        }
 
-        MatchingPost post = MatchingPost.builder()
-                .userIdx(author.getUserIdx())
-                .gameIdx(game.getGameIdx())
-                .stadiumIdx(game.getStadiumIdx())
-                .cheeringTeamIdx(author.getCheeringTeamId())
-                .title(req.getTitle())                  // title
-                .context(req.getContext())              // context
-                .haveTicket(req.getHaveTicket())        // have_ticket
-                .preferredMatchDate(LocalDate.from(game.getDate()))
-                .build();
+        // 2) 경기로부터 날짜, 경기장 ID 꺼내기
+        LocalDate gameDate = LocalDate.from(game.getDate());       // 엔티티의 날짜 필드
+        Integer stadiumIdx = game.getStadiumIdx();     // 엔티티의 경기장 ID 필드
 
-        // ③ 저장 후 ID 리턴
-        matchingPostRepository.save(post);
-        return post.getMatchingPostIdx();
+        // 3) MatchingPost 엔티티 생성 및 값 세팅
+        MatchingPost post = new MatchingPost();
+        post.setUser(user);
+        post.setUserIdx(user.getUserIdx());// 작성자
+        post.setCheeringTeamIdx(user.getCheeringTeamId());    // 작성자의 응원 팀
+        post.setTitle(req.getTitle());
+        post.setContext(req.getContext());
+        post.setCreatedAt(LocalDateTime.now());
+        post.setGameIdx(req.getGameIdx());
+        post.setHaveTicket(req.getHaveTicket());
+        post.setIsMatched(false);
+
+        // 4) game에서 가져온 날짜와 경기장 ID를 preferredMatchDate, stadiumIdx에 넣기
+        post.setPreferredMatchDate(gameDate);
+        post.setStadiumIdx(stadiumIdx);
+
+        // (만약 status 컬럼을 제거했다면 여기서는 건드릴 필요 없음)
+        // post.setStatus("OPEN");  // ← status 컬럼을 썼었다면, DTO+엔티티에서 삭제했으므로 이 줄도 없어짐
+
+        MatchingPost saved = matchingPostRepository.save(post);
+        return saved.getMatchingPostIdx();
     }
 
     public List<MatchingPostListByGameResponse> getPostsByGame(int gameIdx, Pageable pageable) {
