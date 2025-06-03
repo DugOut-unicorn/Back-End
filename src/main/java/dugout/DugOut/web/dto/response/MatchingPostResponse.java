@@ -15,6 +15,7 @@ public class MatchingPostResponse {
     private final String context;
     private final String userNickname;
     private final Integer userCheeringTeamId;
+    private final Boolean haveTicket;
     private final LocalDateTime createdAt;
     private final LocalDate preferredMatchDate;
 
@@ -30,6 +31,7 @@ public class MatchingPostResponse {
             String context,
             String userNickname,
             Integer userCheeringTeamId,
+            Boolean haveTicket,
             LocalDateTime createdAt,
             LocalDate preferredMatchDate
     ) {
@@ -40,6 +42,7 @@ public class MatchingPostResponse {
         this.context      = context;
         this.userNickname = userNickname;
         this.userCheeringTeamId    = userCheeringTeamId;
+        this.haveTicket  = haveTicket;
         this.createdAt    = createdAt;
         this.preferredMatchDate  = preferredMatchDate;
     }
@@ -54,6 +57,7 @@ public class MatchingPostResponse {
                 e.getContext(),
                 e.getUser() != null ? e.getUser().getNickname() : null,
                 e.getUser() != null ? e.getUser().getCheeringTeamId() : null,
+                e.getHaveTicket(),
                 e.getCreatedAt(),
                 e.getPreferredMatchDate()
         );
