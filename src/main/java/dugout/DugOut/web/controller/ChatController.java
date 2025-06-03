@@ -88,7 +88,8 @@ public class ChatController {
     public List<ChatRoomResponse> getMyChatRooms(HttpServletRequest request) {
         User user = getCurrentUser(request);
         Integer userId = user.getUserIdx();
-        return chatService.getUserChatRooms(userId);
+        String profileImgUrl = user.getProfileImageUrl();
+        return chatService.getUserChatRooms(userId, profileImgUrl);
     }
 
 

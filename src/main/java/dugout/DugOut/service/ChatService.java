@@ -63,9 +63,8 @@ public class ChatService {
     /**
      * 로그인한 userId가 속한 모든 채팅방 목록을 반환합니다.
      */
-    public List<ChatRoomResponse> getUserChatRooms(int userId) {
-        List<ChatRoom> rooms =
-                roomRepo.findByUser1IdxOrUser2IdxOrderByCreatedAtDesc(userId, userId);
+    public List<ChatRoomResponse> getUserChatRooms(int userId, String myProfileImageUrl) {
+        List<ChatRoom> rooms = roomRepo.findByUser1IdxOrUser2IdxOrderByCreatedAtDesc(userId, userId);
 
         return rooms.stream()
                 .map(room -> {
@@ -88,6 +87,7 @@ public class ChatService {
                 })
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public ChatRoomInfo getOrCreateRoomForPost(Long currentUserId, Long matchingPostId) {
