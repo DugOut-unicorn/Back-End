@@ -51,23 +51,8 @@ public class MatchingPostController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-//    @Operation(summary = "날짜별 경기 조회", description = "쿼리 파라미터로 받은 날짜에 해당하는 경기 리스트를 반환합니다.")
-//    @GetMapping("/games")
-//    public ResponseEntity<GameListResponse> getGamesByDate(
-//            @RequestParam
-//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-//
-//        // Service 에서 GameDto 리스트를 받아옵니다.
-//        List<GameListResponse.GameDto> games = gameService.getGamesByDate(date);
-//
-//        // 최종 응답 DTO 생성
-//        GameListResponse response = new GameListResponse(date, games);
-//        return ResponseEntity.ok(response);
-//    }
-
     @Operation(
-            summary = "매칭 글 등록",
-            description = "매칭글을 등록합니다."
+            summary = "매칭 글 등록"
     )
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -90,8 +75,7 @@ public class MatchingPostController {
     }
 
     @Operation(
-            summary = "게임별 매칭글 조회 (DTO 반환)",
-            description = "gameIdx 로 특정 경기의 매칭글 리스트를 간략화된 DTO 형태로 반환합니다."
+            summary = "게임별 매칭글 조회"
     )
     @GetMapping("/by-game/{gameIdx}")
     public ResponseEntity<List<MatchingPostListByGameResponse>> getByGame(
@@ -105,8 +89,7 @@ public class MatchingPostController {
     }
 
     @Operation(
-            summary = "매칭글 상세 조회",
-            description = "matchingPostIdx 로 특정 매칭글의 상세 정보를 반환합니다."
+            summary = "매칭글 상세 조회"
     )
     @GetMapping("/{postIdx}")
     public ResponseEntity<MatchingPostDetailResponse> getPostDetail(
