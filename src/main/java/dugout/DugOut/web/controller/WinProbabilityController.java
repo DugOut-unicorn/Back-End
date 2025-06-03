@@ -2,6 +2,7 @@ package dugout.DugOut.web.controller;
 
 import dugout.DugOut.service.WinProbabilityService;
 import dugout.DugOut.web.dto.response.WinProbabilityDto;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,10 @@ public class WinProbabilityController {
         this.service = service;
     }
 
+
+    @Operation(
+            summary = "특정 날짜의 경기들 승률 예측값 조회"
+    )
     @GetMapping
     public ResponseEntity<List<WinProbabilityDto>> getByDate(
             @RequestParam("date")

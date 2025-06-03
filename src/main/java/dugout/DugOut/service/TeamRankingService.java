@@ -1,8 +1,11 @@
 package dugout.DugOut.service;
 
+import dugout.DugOut.domain.TeamRankings;
 import dugout.DugOut.domain.TeamRecord;
+import dugout.DugOut.repository.TeamRankingRepository;
 import dugout.DugOut.repository.TeamRecordRepository;
 import dugout.DugOut.web.dto.response.TeamRankingResponse;
+import dugout.DugOut.web.dto.response.TeamRankingsResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,9 +16,11 @@ import java.util.stream.Collectors;
 public class TeamRankingService {
 
     private final TeamRecordRepository teamRecordRepo;
+    private final TeamRankingRepository teamRankingRepository;
 
-    public TeamRankingService(TeamRecordRepository teamRecordRepo) {
+    public TeamRankingService(TeamRecordRepository teamRecordRepo, TeamRankingRepository teamRankingRepository) {
         this.teamRecordRepo = teamRecordRepo;
+        this.teamRankingRepository = teamRankingRepository;
     }
 
     /**
@@ -35,6 +40,17 @@ public class TeamRankingService {
                         tr.getDraw(),
                         tr.getLose()
                 ))
+                .collect(Collectors.toList());
+    }
+
+
+    public List<TeamRankingsResponse> getFinalRanking() {
+        // id 1 ~ 10
+        List<TeamRankings> entities = teamRankingRepository.findByIdBetweenOrderByIdAsc(1, 10);
+
+        // 엔티티 → DTO 변환
+        return entities.stream()
+                .map(TeamRankingsResponse::of)
                 .collect(Collectors.toList());
     }
 }

@@ -1,11 +1,11 @@
 package dugout.DugOut.web.controller;
 
-import dugout.DugOut.domain.Game;
 import dugout.DugOut.domain.User;
 import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.*;
 import dugout.DugOut.web.dto.StadiumWeatherDto;
 import dugout.DugOut.web.dto.response.*;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -40,7 +38,6 @@ public class HomeController {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-
     private User getCurrentUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtService.getEmailFromToken(token);
@@ -48,7 +45,9 @@ public class HomeController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    //로그인 한 유저의 응원 팀 반환
+    @Operation(
+            summary = "상단 배너 정보 반환"
+    )
     @GetMapping("/entry-banner")
     public ResponseEntity<EntryBannerResponse> getEntryBannerInfo(
             HttpServletRequest request
@@ -60,6 +59,10 @@ public class HomeController {
         return ResponseEntity.ok(new EntryBannerResponse(cheeringTeamId,nickname));
     }
 
+
+    @Operation(
+            summary = "뉴스 크롤링 트리거"
+    )
     @GetMapping("/news-fetch")
     public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn(
             @RequestParam(value = "date", required = false)
@@ -74,19 +77,10 @@ public class HomeController {
         return ResponseEntity.ok(latest);
     }
 
-    //진행 중인 경기 조회
-    @GetMapping("/ongoing-games")
-    public ResponseEntity<List<Game>> getOngoing(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(value="time", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time
-    ) {
-        LocalTime now = (time != null ? time : LocalTime.now());
-        List<Game> ongoing = gameService.getOngoingGames(date, now);
-        return ResponseEntity.ok(ongoing);
-    }
 
-    // 최신 5개 매칭글 반환
+    @Operation(
+            summary = "최신 매칭글 반환"
+    )
     @GetMapping("/recent-matching-posts")
     public ResponseEntity<List<MatchingPostResponse>> getRecent() {
         List<MatchingPostResponse> dtoList = matchingPostService.getRecentPosts();
@@ -94,14 +88,19 @@ public class HomeController {
     }
 
 
-    // 팀 랭킹 반환
+    @Operation(
+            summary = "팀 순위 반환"
+    )
     @GetMapping("/ranking")
     public ResponseEntity<List<TeamRankingResponse>> getRanking() {
         List<TeamRankingResponse> ranking = teamRankingService.getLatestRanking();
         return ResponseEntity.ok(ranking);
     }
 
-    // 월별/일별 경기 일정 반환
+
+    @Operation(
+            summary = "월별/일별 경기 일정 반환"
+    )
     @GetMapping("/calendar-games")
     public ResponseEntity<CalendarGamesResponse> getCalendarGames(
             @RequestParam("month")
@@ -136,7 +135,10 @@ public class HomeController {
         return ResponseEntity.ok(resp);
     }
 
-    // 최근 경기 결과 반환
+
+    @Operation(
+            summary = "최근 경기 결과 반환"
+    )
     @GetMapping("/recent-results")
     public ResponseEntity<GameResultResponse> recent(
             @RequestParam(required = false)
@@ -150,6 +152,10 @@ public class HomeController {
         return ResponseEntity.ok(dto);
     }
 
+
+    @Operation(
+            summary = "각 구장별 날씨 데이터 반환"
+    )
     @GetMapping("/stadium-weathers")
     public List<StadiumWeatherDto> stadiumWeathers() {
         // WebFlux 가 아니라면 collectList().block() 로 동기화
