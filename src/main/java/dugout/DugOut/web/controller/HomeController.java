@@ -136,9 +136,7 @@ public class HomeController {
     }
 
 
-    @Operation(
-            summary = "최근 경기 결과 반환"
-    )
+    @Operation(summary = "최근 경기 결과 반환")
     @GetMapping("/recent-results")
     public ResponseEntity<GameResultResponse> recent(
             @RequestParam(required = false)
@@ -146,11 +144,19 @@ public class HomeController {
             LocalDate date,
             @RequestParam(defaultValue = "5") int limit
     ) {
-        LocalDate base = Optional.ofNullable(date)
-                .orElse(LocalDate.now(ZoneId.of("Asia/Seoul")));
-        GameResultResponse dto = gameResultService.getRecent(base, limit);
-        return ResponseEntity.ok(dto);
+        // 1) date가 null인 경우 → “가장 최근 경기 결과”를 찾아서 반환
+        if (date == null) {
+            LocalDate base = LocalDate.now(ZoneId.of("Asia/Seoul"));
+            GameResultResponse dto = gameResultService.getRecent(base, limit);
+            return ResponseEntity.ok(dto);
+        }
+
+        // 2) date가 null이 아닌 경우 → “해당 날짜(date) 결과”를 조회
+        List<RecentResultDto> items = gameResultService.findByExactDate(date, limit);
+        // matchDate도 그냥 date
+        return ResponseEntity.ok(new GameResultResponse(date, date, items));
     }
+
 
 
     @Operation(
