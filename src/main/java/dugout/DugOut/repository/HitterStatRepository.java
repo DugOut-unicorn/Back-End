@@ -26,4 +26,10 @@ public interface HitterStatRepository extends JpaRepository<HitterStat, Integer>
 
     @Query("SELECT h FROM HitterStat h ORDER BY h.avg DESC LIMIT 3")
     List<HitterStat> findTop3HittersByAvg();
+
+    @Query("SELECT h FROM HitterStat h ORDER BY h.hr DESC LIMIT 3")
+    List<HitterStat> findTop3HittersByHr();
+
+    @Query("SELECT h FROM HitterStat h ORDER BY h.h DESC LIMIT 3")
+    List<HitterStat> findTop3HittersByH();
 } 
