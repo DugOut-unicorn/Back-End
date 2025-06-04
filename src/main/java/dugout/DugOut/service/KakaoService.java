@@ -116,6 +116,7 @@ public class KakaoService {
                                         .email(email)
                                         .name(name)
                                         .nickname(nickname)
+                                        .hasSignedIn(false)
                                         .build();
                                 log.info("[ Kakao Service ] Creating new user: {}", newUser);
                                 User savedUser = userRepository.save(newUser);

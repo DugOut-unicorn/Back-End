@@ -2484,7 +2484,109 @@ public class RecordController {
         }
     }
 
+    @Operation(summary = "홈런 상위 3명 조회", description = "타자의 홈런 수 상위 3명을 조회합니다.")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = TopHitterResponseDto.class)
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "선수 정보를 찾을 수 없음",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "실패 응답",
+                        value = """
+                            {
+                                "success": false,
+                                "message": "선수 정보 조회에 실패했습니다: 선수를 찾을 수 없습니다."
+                            }"""
+                    )
+                }
+            )
+        )
+    })
+    @GetMapping("/personalRank/hitter/HR")
+    public ApiResponse<List<TopHitterResponseDto>> getTopHittersByHr() {
+        try {
+            List<HitterStat> topHitterStats = hitterStatRepository.findTop3HittersByHr();
 
+            List<TopHitterResponseDto> response = topHitterStats.stream()
+                    .map(stat -> {
+                        Player player = playerRepository.findById(stat.getPlayerIdx().longValue())
+                                .orElseThrow(() -> new RuntimeException("선수를 찾을 수 없습니다."));
+                        return TopHitterResponseDto.builder()
+                                .playerName(player.getPlayerName())
+                                .backNumber(player.getBackNumber())
+                                .playerIdx(player.getPlayerIdx())
+                                .playerImageUrl(player.getPlayerImageUrl())
+                                .value(stat.getHr().doubleValue())
+                                .build();
+                    })
+                    .toList();
 
+            return ApiResponse.success("타자 홈런 상위 3명의 선수 정보를 조회했습니다.", response);
+        } catch (Exception e) {
+            return ApiResponse.error("선수 정보 조회에 실패했습니다: " + e.getMessage());
+        }
+    }
 
+    @Operation(summary = "안타 수 상위 3명 조회", description = "타자의 안타 수 상위 3명을 조회합니다.")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = TopHitterResponseDto.class)
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "선수 정보를 찾을 수 없음",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "실패 응답",
+                        value = """
+                            {
+                                "success": false,
+                                "message": "선수 정보 조회에 실패했습니다: 선수를 찾을 수 없습니다."
+                            }"""
+                    )
+                }
+            )
+        )
+    })
+    @GetMapping("/personalRank/hitter/H")
+    public ApiResponse<List<TopHitterResponseDto>> getTopHittersByH() {
+        try {
+            List<HitterStat> topHitterStats = hitterStatRepository.findTop3HittersByH();
+
+            List<TopHitterResponseDto> response = topHitterStats.stream()
+                    .map(stat -> {
+                        Player player = playerRepository.findById(stat.getPlayerIdx().longValue())
+                                .orElseThrow(() -> new RuntimeException("선수를 찾을 수 없습니다."));
+                        return TopHitterResponseDto.builder()
+                                .playerName(player.getPlayerName())
+                                .backNumber(player.getBackNumber())
+                                .playerIdx(player.getPlayerIdx())
+                                .playerImageUrl(player.getPlayerImageUrl())
+                                .value(stat.getH().doubleValue())
+                                .build();
+                    })
+                    .toList();
+
+            return ApiResponse.success("타자 안타 수 상위 3명의 선수 정보를 조회했습니다.", response);
+        } catch (Exception e) {
+            return ApiResponse.error("선수 정보 조회에 실패했습니다: " + e.getMessage());
+        }
+    }
 } 
