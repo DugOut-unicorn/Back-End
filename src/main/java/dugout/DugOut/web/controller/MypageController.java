@@ -7,11 +7,13 @@ import dugout.DugOut.dto.UserTempResponseDto;
 import dugout.DugOut.repository.MatchingPostRepository;
 import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.JwtService;
+import dugout.DugOut.service.MatchingPostService;
 import dugout.DugOut.service.S3Service;
 import dugout.DugOut.web.dto.request.UserInfoUpdateRequestDto;
 import dugout.DugOut.web.dto.request.UserPersonalUpdateRequestDto;
 import dugout.DugOut.web.dto.response.ApiResponse;
 import dugout.DugOut.web.dto.response.MypageMatchingPostsResponse;
+import dugout.DugOut.web.dto.response.ToggleMatchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,6 +23,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +41,7 @@ public class MypageController {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final S3Service s3Service;
+    private final MatchingPostService matchingPostService;
 
     private User getCurrentUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7);
@@ -192,5 +196,14 @@ public class MypageController {
 
         // 3) DTO 변환
         return new MypageMatchingPostsResponse(new MypageMatchingPostsResponse.UserInfo(user), posts);
+    }
+
+    @Operation(summary = "매칭글 is_matched 상태 토글")
+    @PatchMapping("/{id}/toggle-matched")
+    public ResponseEntity<ToggleMatchResponse> toggleMatched(
+            @PathVariable("id") Long matchingPostIdx
+    ) {
+        ToggleMatchResponse response = matchingPostService.toggleMatched(matchingPostIdx);
+        return ResponseEntity.ok(response);
     }
 } 

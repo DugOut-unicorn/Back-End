@@ -11,10 +11,12 @@ import dugout.DugOut.web.dto.request.CreateMatchingPostRequest;
 import dugout.DugOut.web.dto.response.MatchingPostDetailResponse;
 import dugout.DugOut.web.dto.response.MatchingPostListByGameResponse;
 import dugout.DugOut.web.dto.response.MatchingPostResponse;
+import dugout.DugOut.web.dto.response.ToggleMatchResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -96,5 +98,23 @@ public class MatchingPostService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + post.getUserIdx()));
 
         return new MatchingPostDetailResponse(post, author.getNickname());
+    }
+
+    @Transactional
+    public ToggleMatchResponse toggleMatched(Long matchingPostIdx) {
+        MatchingPost post = matchingPostRepository.findById(Math.toIntExact(matchingPostIdx))
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "MatchingPost with idx=" + matchingPostIdx + " not found."
+                ));
+
+        // isMatched를 null-safe하게 토글
+        Boolean current = post.getIsMatched();
+        Boolean newStatus = (current == null) ? Boolean.TRUE : !current;
+        post.setIsMatched(newStatus);
+
+        // 변경된 엔티티를 저장 (@Transactional이므로 flush 시점에 반영됨)
+        matchingPostRepository.save(post);
+
+        return new ToggleMatchResponse(matchingPostIdx, newStatus);
     }
 }
