@@ -9,33 +9,32 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "chatMessage")
+@Table(name = "chat_message")
 @Getter
 @Setter
 @NoArgsConstructor
 public class ChatMessage {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "messageIdx")
+    @Column(name = "message_idx")
     private Integer messageIdx;
-    
-    @Column(name = "chatRoomIdx2", nullable = false)
-    private Integer chatRoomIdx2;
-    
-    @Column(name = "userIdx", nullable = false)
-    private Integer userIdx;
-    
-    @Column(name = "chatRoomIdx", nullable = false)
-    private Integer chatRoomIdx;
-    
-    @Column(name = "senderIdx", nullable = false)
+
+    @Column(name = "receiver_idx", nullable = false)
+    private Integer receiverIdx;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_room_idx", nullable = false)
+    private ChatRoom chatRoom;
+
+    @Column(name = "sender_idx", nullable = false)
     private Integer senderIdx;
-    
-    @Column(columnDefinition = "TEXT")
+
+    @Lob
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
-    
+
     @CreationTimestamp
-    @Column(name = "sentAt", nullable = false, updatable = false)
+    @Column(name = "sent_at", nullable = false, updatable = false)
     private LocalDateTime sentAt;
-} 
+}

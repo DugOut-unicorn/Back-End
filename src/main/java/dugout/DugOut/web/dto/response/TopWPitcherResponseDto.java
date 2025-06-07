@@ -9,4 +9,5 @@ public class TopWPitcherResponseDto {
     private String playerName;
     private Integer w;
     private String playerImageUrl;
+    private Integer playerIdx;
 } 

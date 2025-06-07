@@ -270,6 +270,7 @@ public class LoginController {
         }
         
             user.setCheeringTeamId(cheeringTeamRequest.getCheeringTeamId());
+            user.setHasSignedIn(true);
             userRepository.save(user);
                 
             return ResponseEntity.ok(ApiResponse.success(SuccessResponse.CHEERING_TEAM_UPDATED));
@@ -279,19 +280,71 @@ public class LoginController {
         }
     }
 
-//    @GetMapping("/nickname")
-//    public ResponseEntity<ApiResponse<Map<String, Object>>> getNickname(HttpServletRequest request) {
-//        try {
-//            User user = getUserFromToken(request);
-//
-//            Map<String, Object> response = new HashMap<>();
-//            response.put("nickname", user.getNickname());
-//            response.put("cheeringTeamId", user.getCheeringTeamId());
-//
-//            return ResponseEntity.ok(ApiResponse.success("사용자 정보를 성공적으로 조회했습니다.", response));
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.badRequest()
-//                    .body(ApiResponse.error(e.getMessage()));
-//        }
-//    }
+    @Operation(
+        summary = "회원가입 여부 확인",
+        description = "토큰으로 사용자의 회원가입 여부를 확인합니다.",
+        parameters = {
+            @Parameter(
+                name = "Authorization",
+                description = "JWT 토큰",
+                required = true,
+                in = ParameterIn.HEADER,
+                schema = @Schema(type = "string", example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+            )
+        }
+    )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "성공 응답",
+                        value = """
+                            {
+                                "success": true,
+                                "message": "회원가입 여부를 성공적으로 조회했습니다.",
+                                "data": {
+                                    "hasSignedIn": true
+                                }
+                            }"""
+                    )
+                }
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 실패",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "인증 실패",
+                        value = """
+                            {
+                                "success": false,
+                                "message": "유효하지 않은 토큰입니다."
+                            }"""
+                    )
+                }
+            )
+        )
+    })
+    @GetMapping("/hasSignedIn")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> getHasSignedIn(HttpServletRequest request) {
+        try {
+            User user = getUserFromToken(request);
+            
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("hasSignedIn", user.getHasSignedIn());
+            
+            return ResponseEntity.ok(ApiResponse.success("회원가입 여부를 성공적으로 조회했습니다.", response));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
 }

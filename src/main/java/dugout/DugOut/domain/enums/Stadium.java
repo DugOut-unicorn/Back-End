@@ -4,6 +4,8 @@ package dugout.DugOut.domain.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 @AllArgsConstructor
 public enum Stadium {
@@ -18,12 +20,20 @@ public enum Stadium {
     GWANGJU_KIA     (9, "광주기아챔피언스필드",      35.1390, 126.8526, 58,  74),
     DAEJEON_HANHWA (10,"대전한화생명볼파크",        36.3247, 127.4260, 67, 100);
 
-    private final int id;
+    private final int idx;
     private final String name;
     private final double lat;    // for OpenWeatherMap
     private final double lon;    // for OpenWeatherMap
     private final int nx;        // for KMA(grid-X)
     private final int ny;        // for KMA(grid-Y)
+
+    public static String getNameByIdx(int idx) {
+        return Arrays.stream(values())
+                .filter(s -> s.idx == idx)
+                .findFirst()
+                .map(Stadium::getName)
+                .orElse("Unknown");
+    }
 }
 
 

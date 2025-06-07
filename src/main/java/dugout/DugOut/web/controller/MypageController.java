@@ -7,13 +7,23 @@ import dugout.DugOut.dto.UserTempResponseDto;
 import dugout.DugOut.repository.MatchingPostRepository;
 import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.JwtService;
+import dugout.DugOut.service.MatchingPostService;
 import dugout.DugOut.service.S3Service;
 import dugout.DugOut.web.dto.request.UserInfoUpdateRequestDto;
 import dugout.DugOut.web.dto.request.UserPersonalUpdateRequestDto;
 import dugout.DugOut.web.dto.response.ApiResponse;
+import dugout.DugOut.web.dto.response.MypageMatchingPostsResponse;
+import dugout.DugOut.web.dto.response.ToggleMatchResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +41,7 @@ public class MypageController {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final S3Service s3Service;
+    private final MatchingPostService matchingPostService;
 
     private User getCurrentUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7);
@@ -153,5 +164,46 @@ public class MypageController {
             log.error("프로필 이미지 업로드 실패: {}", e.getMessage());
             return ApiResponse.error("프로필 이미지 업로드에 실패했습니다.");
         }
+    }
+
+    /**
+     * 로그인한 유저 혹은 파라미터로 넘긴 userId의 매칭글 리스트를 반환
+     *
+     * @param userIdOpt 선택적 유저 ID (없으면 JWT 기준 내 아이디)
+     */
+    @Operation(summary = "매칭글 조회",
+            description = "로그인한 유저 또는 쿼리 파라미터로 지정한 특정 유저ID의 매칭글을 반환합니다.")
+    @GetMapping("/matching-posts")
+    public MypageMatchingPostsResponse getUserPosts(
+            @RequestParam(name="targetUserId", required=false) Long userIdOpt,
+            HttpServletRequest request) {
+
+        // 1) 파라미터가 없으면 JWT 기준으로 내 User 가져오기
+        User user;
+        if (userIdOpt == null) {
+            user = getCurrentUser(request);
+        } else {
+            user = userRepository.findById(userIdOpt.intValue())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        }
+
+        // 2) 매칭글 조회 후 PostInfo 로 변환
+        List<MypageMatchingPostsResponse.PostInfo> posts = matchingPostRepository
+                .findByUserIdx(user.getUserIdx().intValue())
+                .stream()
+                .map(MypageMatchingPostsResponse.PostInfo::new)
+                .collect(Collectors.toList());
+
+        // 3) DTO 변환
+        return new MypageMatchingPostsResponse(new MypageMatchingPostsResponse.UserInfo(user), posts);
+    }
+
+    @Operation(summary = "매칭글 is_matched 상태 토글")
+    @PatchMapping("/{id}/toggle-matched")
+    public ResponseEntity<ToggleMatchResponse> toggleMatched(
+            @PathVariable("id") Long matchingPostIdx
+    ) {
+        ToggleMatchResponse response = matchingPostService.toggleMatched(matchingPostIdx);
+        return ResponseEntity.ok(response);
     }
 } 

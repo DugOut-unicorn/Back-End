@@ -1,20 +1,21 @@
 package dugout.DugOut.web.controller;
 
-import dugout.DugOut.domain.Game;
+import dugout.DugOut.domain.User;
+import dugout.DugOut.repository.UserRepository;
 import dugout.DugOut.service.*;
 import dugout.DugOut.web.dto.StadiumWeatherDto;
 import dugout.DugOut.web.dto.response.*;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-
+import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -34,26 +35,34 @@ public class HomeController {
     private final MatchingPostService matchingPostService;
     private final GameResultService gameResultService;
     private final WeatherService weatherService;
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    //로그인 한 유저의 응원 팀 반환
-    @GetMapping("/users/cheering-team")
-    public ResponseEntity<CheeringTeamResponse> getMyCheeringTeam(
-            @RequestParam("userIdx") Integer userIdx
-    ) {
-        Integer cheeringTeamId = userService.getCheeringTeamId(userIdx);
-        return ResponseEntity.ok(new CheeringTeamResponse(cheeringTeamId));
+    private User getCurrentUser(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        String email = jwtService.getEmailFromToken(token);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-//    //최신 뉴스 크롤링 후 반환
-//    @GetMapping("/news-fetch")
-//    public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn() throws IOException {
-//        // 오늘 날짜 ISO 포맷 (yyyy-MM-dd)
-//        String todayIso = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-//        // Selenium 으로 바로 스크래핑한 결과
-//        List<NewsResponse> latest = newsFetchService.scrapeWithSelenium(todayIso);
-//        return ResponseEntity.ok(latest);
-//    }
+    @Operation(
+            summary = "상단 배너 정보 반환"
+    )
+    @GetMapping("/entry-banner")
+    public ResponseEntity<EntryBannerResponse> getEntryBannerInfo(
+            HttpServletRequest request
+    ) {
+        User user = getCurrentUser(request);
+        Integer userIdx = user.getUserIdx();
+        Integer cheeringTeamId = userService.getCheeringTeamId(userIdx);
+        String nickname = user.getNickname();
+        return ResponseEntity.ok(new EntryBannerResponse(cheeringTeamId,nickname));
+    }
 
+
+    @Operation(
+            summary = "뉴스 크롤링 트리거"
+    )
     @GetMapping("/news-fetch")
     public ResponseEntity<List<NewsResponse>> triggerFetchAndReturn(
             @RequestParam(value = "date", required = false)
@@ -68,28 +77,10 @@ public class HomeController {
         return ResponseEntity.ok(latest);
     }
 
-    //진행 중인 경기 조회
-    @GetMapping("/ongoing-games")
-    public ResponseEntity<List<Game>> getOngoing(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(value="time", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time
-    ) {
-        LocalTime now = (time != null ? time : LocalTime.now());
-        List<Game> ongoing = gameService.getOngoingGames(date, now);
-        return ResponseEntity.ok(ongoing);
-    }
 
-    /**
-     * 오늘 일정된 경기 목록 조회
-     * GET /api/games/today
-     */
-    @GetMapping("/today-games")
-    public List<TodayGameListResponse> getTodayGames() {
-        return gameService.getTodayGames();
-    }
-
-    // 최신 5개 매칭글 반환
+    @Operation(
+            summary = "최신 매칭글 반환"
+    )
     @GetMapping("/recent-matching-posts")
     public ResponseEntity<List<MatchingPostResponse>> getRecent() {
         List<MatchingPostResponse> dtoList = matchingPostService.getRecentPosts();
@@ -97,7 +88,9 @@ public class HomeController {
     }
 
 
-    // 팀 랭킹 반환
+    @Operation(
+            summary = "팀 순위 반환"
+    )
     @GetMapping("/ranking")
     public ResponseEntity<List<TeamRankingResponse>> getRanking() {
         List<TeamRankingResponse> ranking = teamRankingService.getLatestRanking();
@@ -105,17 +98,45 @@ public class HomeController {
     }
 
 
-
+    @Operation(
+            summary = "월별/일별 경기 일정 반환"
+    )
     @GetMapping("/calendar-games")
-    public ResponseEntity<CalendarGamesResponse> getMonthlyGames(
+    public ResponseEntity<CalendarGamesResponse> getCalendarGames(
             @RequestParam("month")
-            @DateTimeFormat(pattern="yyyy-MM") YearMonth ym
+            @DateTimeFormat(pattern = "yyyy-MM") YearMonth ym,
+
+            @RequestParam(value = "day", required = false) Integer dayOfMonth,
+
+            @RequestParam(value = "cheeringTeamIdx", required = false) Integer cheeringTeamIdx
     ) {
-        CalendarGamesResponse resp = calendarService.getMonthlyGames(ym);
+        // day 파라미터 유효성 검사
+        if (dayOfMonth != null) {
+            if (dayOfMonth < 1 || dayOfMonth > ym.lengthOfMonth()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        String.format("유효하지 않은 day 값: %d (월: %s)", dayOfMonth, ym)
+                );
+            }
+        }
+
+        // 2) cheeringTeamIdx 유효성 검사 (예: 양수만 허용)
+        if (cheeringTeamIdx != null && cheeringTeamIdx < 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "유효하지 않은 cheeringTeamIdx 값: " + cheeringTeamIdx
+            );
+        }
+
+        // 3) 서비스 호출: month, dayOfMonth, cheeringTeamIdx 모두 넘김
+        CalendarGamesResponse resp =
+                calendarService.getMonthlyGames(ym, dayOfMonth, cheeringTeamIdx);
+
         return ResponseEntity.ok(resp);
     }
 
-    // 최근 경기 결과 반환
+
+    @Operation(summary = "최근 경기 결과 반환")
     @GetMapping("/recent-results")
     public ResponseEntity<GameResultResponse> recent(
             @RequestParam(required = false)
@@ -123,12 +144,24 @@ public class HomeController {
             LocalDate date,
             @RequestParam(defaultValue = "5") int limit
     ) {
-        LocalDate base = Optional.ofNullable(date)
-                .orElse(LocalDate.now(ZoneId.of("Asia/Seoul")));
-        GameResultResponse dto = gameResultService.getRecent(base, limit);
-        return ResponseEntity.ok(dto);
+        // 1) date가 null인 경우 → “가장 최근 경기 결과”를 찾아서 반환
+        if (date == null) {
+            LocalDate base = LocalDate.now(ZoneId.of("Asia/Seoul"));
+            GameResultResponse dto = gameResultService.getRecent(base, limit);
+            return ResponseEntity.ok(dto);
+        }
+
+        // 2) date가 null이 아닌 경우 → “해당 날짜(date) 결과”를 조회
+        List<RecentResultDto> items = gameResultService.findByExactDate(date, limit);
+        // matchDate도 그냥 date
+        return ResponseEntity.ok(new GameResultResponse(date, date, items));
     }
 
+
+
+    @Operation(
+            summary = "각 구장별 날씨 데이터 반환"
+    )
     @GetMapping("/stadium-weathers")
     public List<StadiumWeatherDto> stadiumWeathers() {
         // WebFlux 가 아니라면 collectList().block() 로 동기화

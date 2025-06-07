@@ -3,6 +3,7 @@ package dugout.DugOut.web.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -25,6 +26,7 @@ public class CalendarGamesResponse {
         private final Integer gameIdx;
         private final String  homeTeamName;
         private final String  awayTeamName;
+        private final String  stadiumName;
         private final Integer startTime;
     }
 }

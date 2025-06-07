@@ -68,3 +68,10 @@ cloud:
     credentials:
       accessKey: ${S3_ACCESSKEY}
       secretKey: ${S3_SECRETKEY}
+
+logging:
+  level:
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.messaging.simp.SimpMessagingTemplate: DEBUG
+    org.springframework.messaging.simp.user: DEBUG

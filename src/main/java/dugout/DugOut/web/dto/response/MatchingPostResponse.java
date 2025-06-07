@@ -8,14 +8,14 @@ import java.time.LocalDateTime;
 
 @Getter
 public class MatchingPostResponse {
-    private final Integer postIdx;
+    private final Long postIdx;
     private final String title;
     private final Integer stadiumIdx;
     private final Integer gameIdx;
     private final String context;
     private final String userNickname;
     private final Integer userCheeringTeamId;
-    private final Integer status;
+    private final Boolean haveTicket;
     private final LocalDateTime createdAt;
     private final LocalDate preferredMatchDate;
 
@@ -24,14 +24,14 @@ public class MatchingPostResponse {
      *  순서: postIdx, title, stadiumIdx, gameIdx, context, userNickname, status, createdAt
      */
     public MatchingPostResponse(
-            Integer postIdx,
+            Long postIdx,
             String title,
             Integer stadiumIdx,
             Integer gameIdx,
             String context,
             String userNickname,
             Integer userCheeringTeamId,
-            Integer status,
+            Boolean haveTicket,
             LocalDateTime createdAt,
             LocalDate preferredMatchDate
     ) {
@@ -42,7 +42,7 @@ public class MatchingPostResponse {
         this.context      = context;
         this.userNickname = userNickname;
         this.userCheeringTeamId    = userCheeringTeamId;
-        this.status       = status;
+        this.haveTicket  = haveTicket;
         this.createdAt    = createdAt;
         this.preferredMatchDate  = preferredMatchDate;
     }
@@ -57,7 +57,7 @@ public class MatchingPostResponse {
                 e.getContext(),
                 e.getUser() != null ? e.getUser().getNickname() : null,
                 e.getUser() != null ? e.getUser().getCheeringTeamId() : null,
-                e.getStatus(),
+                e.getHaveTicket(),
                 e.getCreatedAt(),
                 e.getPreferredMatchDate()
         );

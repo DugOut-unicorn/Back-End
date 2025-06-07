@@ -12,10 +12,10 @@ public class DefenseStat {
     @Id
     @Column(name = "player_idx")
     private Integer playerIdx;
-
+    
     @Column(name = "team_idx")
     private Integer teamIdx;
-
+    
     @Column(name = "g")
     private Integer g;  // 경기 수
 

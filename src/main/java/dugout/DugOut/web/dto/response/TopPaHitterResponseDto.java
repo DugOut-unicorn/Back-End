@@ -9,4 +9,5 @@ public class TopPaHitterResponseDto {
     private String playerName;
     private Integer pa;
     private String playerImageUrl;
+    private Integer playerIdx;
 } 
