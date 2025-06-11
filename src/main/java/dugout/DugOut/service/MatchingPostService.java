@@ -76,14 +76,22 @@ public class MatchingPostService {
     public List<MatchingPostListByGameResponse> getPostsByGame(int gameIdx, Pageable pageable) {
         return matchingPostRepository.findByGameIdx(gameIdx, pageable)
                 .stream()
-                .map(p -> new MatchingPostListByGameResponse(
-                        p.getMatchingPostIdx(),
-                        p.getTitle(),
-                        p.getContext(),
-                        p.getHaveTicket(),
-                        p.getIsMatched(),
-                        p.getCreatedAt()
-                ))
+                .map(p -> {
+                    // 작성자 정보 조회
+                    User author = userRepository.findById(p.getUserIdx())
+                            .orElseThrow(() -> new RuntimeException("작성자 정보를 찾을 수 없습니다. userIdx=" + p.getUserIdx()));
+
+                    // DTO에 닉네임까지 추가
+                    return new MatchingPostListByGameResponse(
+                            p.getMatchingPostIdx(),
+                            p.getTitle(),
+                            p.getContext(),
+                            p.getHaveTicket(),
+                            p.getIsMatched(),
+                            p.getCreatedAt(),
+                            author.getNickname()
+                    );
+                })
                 .toList();
     }
 
