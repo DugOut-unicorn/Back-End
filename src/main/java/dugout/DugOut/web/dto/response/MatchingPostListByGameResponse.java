@@ -11,6 +11,7 @@ public class MatchingPostListByGameResponse {
     private final Boolean haveTicket;
     private final Boolean isMatched;
     private final LocalDateTime createdAt;
+    private final String nickname;
 
     public MatchingPostListByGameResponse(
             Long postIdx,
@@ -18,7 +19,7 @@ public class MatchingPostListByGameResponse {
             String context,
             Boolean haveTicket,
             Boolean isMatched,
-            LocalDateTime createdAt
+            LocalDateTime createdAt, String nickname
     ) {
         this.matchingPostIdx = postIdx;
         this.title           = title;
@@ -26,5 +27,6 @@ public class MatchingPostListByGameResponse {
         this.haveTicket      = haveTicket;
         this.isMatched       = isMatched;
         this.createdAt       = createdAt;
+        this.nickname = nickname;
     }
 }
